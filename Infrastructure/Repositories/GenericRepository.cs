@@ -1,4 +1,7 @@
 ﻿using Core.Interfaces;
+using Core.Models;
+using Core.Specifictions;
+using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -8,10 +11,10 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories
 {
-    public class GenericRepository<T> : IGenericRepository<T> where T : class
+    public class GenericRepository<T> : IGenericRepository<T> where T : BaseModel
     {
-        private readonly AppContext _context;
-        public GenericRepository(AppContext context)
+        private readonly storeContext _context;
+        public GenericRepository(storeContext context)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
@@ -33,15 +36,28 @@ namespace Infrastructure.Repositories
             return await _context.Set<T>().FindAsync(id);
         }
 
-        public async Task<IReadOnlyList<T>> ListAllAsync()
-        {
-            return await _context.Set<T>().ToListAsync();
-        }
-
         public async Task UpdateAsync(T entity)
         {
             _context.Entry(entity).State = EntityState.Modified;
             await _context.SaveChangesAsync();
         }
+        public async Task<IReadOnlyList<T>> ListAllAsync()
+        {
+            return await _context.Set<T>().ToListAsync();
+        }
+        public async Task<IReadOnlyList<T>> GetEntitiesWithSpec(ISpecification<T> spec)
+        {
+            return await ApplySpecification(spec).ToListAsync();
+        }
+        public async Task<T> GetEntityWithSpec(ISpecification<T> spec)
+        {
+            return await ApplySpecification(spec).FirstOrDefaultAsync();
+        }
+        private IQueryable<T> ApplySpecification(ISpecification<T> spec)
+        {
+            return SpecificationEvaluator<T>.GetQuery(_context.Set<T>().AsQueryable(), spec);
+        }
+
+
     }
 }

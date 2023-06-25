@@ -10,9 +10,9 @@ namespace Infrastructure.Repositories
 {
     public class UnitOfWork : IUnitOfWork
     {
-        private readonly AppContext _context;
+        private readonly storeContext _context;
         private Hashtable _repositories;
-        public UnitOfWork(AppContext context)
+        public UnitOfWork(storeContext context)
         {
             _context = context;
         }
