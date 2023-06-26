@@ -11,12 +11,12 @@ namespace Core.Interfaces
     public interface IGenericRepository<T>
     {
 
-        Task<T> GetByIdAsync(int id);
-        Task<IReadOnlyList<T>> ListAllAsync();
+        Task<T> GetByIdAsync(int id, string includeProperties = null);
+        Task<IReadOnlyList<T>> ListAllAsync(string includeProperties=null);
         Task<T> GetEntityWithSpec(ISpecification<T> spec);
         Task<IReadOnlyList<T>> GetEntitiesWithSpec(ISpecification<T> spec);
         Task<T> AddAsync(T entity);
-        Task UpdateAsync(T entity);
+        Task UpdateAsync(T entity, string includeProperties=null);
         Task DeleteAsync(T entity);
     }
 }

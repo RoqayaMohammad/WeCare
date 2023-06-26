@@ -10,7 +10,24 @@ namespace API.Helpers
     {
         public MappingProfiles()
         {
-            CreateMap<Departement, DepartementDto>()
+
+            CreateMap<Employee, EmployeeDto>()
+            .ForMember(dest => dest.Phone2, opt => opt.MapFrom(src => string.IsNullOrEmpty(src.Phone2) ? null : src.Phone2))
+            .ForMember(dest => dest.DepartementName, opt => opt.MapFrom(src => src.Departement != null ? src.Departement.Name : null))
+            .ReverseMap();
+
+
+            CreateMap<EmployeeDto, Employee>()
+                .ForMember(dest => dest.Departement, opt => opt.MapFrom<DeptNameResolver>())
+                .ForMember(dest => dest.DeptId, opt => opt.MapFrom<DeptIdValueResolver>())
+                ;
+
+
+            
+
+           
+        //
+        CreateMap<Departement, DepartementDto>()
                 .ForMember(dest => dest.Dept_ID, opt => opt.MapFrom(src => src.Id))
                 .ReverseMap();
 
@@ -96,5 +113,55 @@ namespace API.Helpers
             }
         }
     }
-    
+
+    public class DeptNameResolver : IValueResolver<EmployeeDto, Employee, Departement>
+    {
+        private readonly storeContext _context;
+
+        public DeptNameResolver(storeContext context)
+        {
+            _context = context;
+        }
+
+        public Departement Resolve(EmployeeDto source, Employee destination, Departement destMember, ResolutionContext context)
+        {
+            if (source.DepartementName != null)
+            {
+                var empDepart = _context.Departements.FirstOrDefault(pc => pc.Name == source.DepartementName);
+                if (empDepart != null)
+                {
+                    destination.DeptId = empDepart.Id;
+                    destination.Departement = empDepart;
+                    return destination.Departement;
+                }
+            }
+
+            return destination.Departement;
+        }
+    }
+    public class DeptIdValueResolver : IValueResolver<EmployeeDto, Employee, int>
+    {
+        private readonly storeContext _context;
+
+        public DeptIdValueResolver(storeContext context)
+        {
+            _context = context;
+        }
+        public int Resolve(EmployeeDto source, Employee destination, int destMember, ResolutionContext context)
+        {
+            if (source.DepartementName != null)
+            {
+                var empDept = _context.Departements.FirstOrDefault(pc => pc.Name == source.DepartementName);
+                if (empDept != null)
+                {
+                    destination.DeptId = empDept.Id;
+
+                    return destination.DeptId;
+                }
+            }
+
+            return 1;
+        }
+    }
+
 }

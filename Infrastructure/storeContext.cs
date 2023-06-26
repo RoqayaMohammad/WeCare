@@ -17,6 +17,7 @@ namespace Infrastructure
         public DbSet<Departement> Departements { get; set; }
         public DbSet<Doctor> Doctors { get; set; }
         public DbSet<Patient> Patients { get; set; }
+        public DbSet<Employee> Employees { get; set; }
 
     }
 
