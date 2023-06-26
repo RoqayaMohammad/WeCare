@@ -2,6 +2,7 @@
 using AutoMapper;
 using Core.Models;
 using Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System.Drawing;
 
 namespace API.Helpers
@@ -13,14 +14,34 @@ namespace API.Helpers
             CreateMap<Departement, DepartementDto>()
                 .ForMember(dest => dest.Dept_ID, opt => opt.MapFrom(src => src.Id))
                 .ReverseMap();
-
+            CreateMap<Day, DayDto>()
+                .ForMember(dest => dest.Day_ID, opt => opt.MapFrom(src => src.Id))
+                .ReverseMap();
             CreateMap<Patient, PatientDto>()
                 .ForMember(dest => dest.Patient_ID, opt => opt.MapFrom(src => src.Id))
                 .ReverseMap();
+
             CreateMap<Departement, DoctorDto>()
                 .ForMember(dest => dest.departement, opt => opt.MapFrom(src => src.Name))
                 .ReverseMap();
-            CreateMap<Doctor, DoctorDto>()
+
+
+            CreateMap<Day, BranchDto>()
+                .ForMember(dest => dest.weekend, opt => opt.MapFrom(src => src.Name))
+                .ReverseMap();
+
+
+            CreateMap<Branch, BranchDto>()
+                .ForMember(dest => dest.Branch_ID, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.weekend, opt => opt.MapFrom(src => src.weekend.Name))
+                .ReverseMap();
+
+            CreateMap<BranchDto, Branch>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Branch_ID))
+                .ForMember(dest => dest.weekend, opt => opt.MapFrom<dayNameResolver>())
+                .ForMember(dest => dest.weekendID, opt => opt.MapFrom<dayIdValueResolver>()).ReverseMap();
+        
+        CreateMap<Doctor, DoctorDto>()
                 .ForMember(dest => dest.Doctor_ID, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.FName, opt => opt.MapFrom(src => src.FName))
                 .ForMember(dest => dest.LName, opt => opt.MapFrom(src => src.LName))
@@ -95,6 +116,56 @@ namespace API.Helpers
                 throw new NotImplementedException();
             }
         }
+        public class dayIdValueResolver : IValueResolver<BranchDto, Branch, int>
+        {
+            private readonly storeContext _context;
+
+            public dayIdValueResolver(storeContext context)
+            {
+                _context = context;
+            }
+            public int Resolve(BranchDto source, Branch destination, int destMember, ResolutionContext context)
+            {
+                if (source.weekend != null)
+                {
+                    var day = _context.days.FirstOrDefault(pc => pc.Name == source.weekend);
+                    if (day != null)
+                    {
+                        destination.weekendID = day.Id;
+
+                        return destination.weekendID;
+                    }
+                }
+
+                return 1;
+            }
+        }
+        public class dayNameResolver : IValueResolver<BranchDto, Branch, Day>
+        {
+            private readonly storeContext _context;
+
+            public dayNameResolver(storeContext context)
+            {
+                _context = context;
+            }
+
+            Day IValueResolver<BranchDto, Branch, Day>.Resolve(BranchDto source, Branch destination, Day destMember, ResolutionContext context)
+            {
+                if (source.weekend != null)
+                {
+                    var day = _context.days.FirstOrDefault(pc => pc.Name == source.weekend);
+                    if (day != null)
+                    {
+                        destination.weekendID = day.Id;
+                        destination.weekend = day;
+                        return destination.weekend;
+                    }
+                }
+
+                throw new NotImplementedException();
+            }
+        }
+
     }
     
 }
