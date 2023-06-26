@@ -23,7 +23,10 @@ namespace Infrastructure
         public DbSet<Patient> Patients { get; set; }
         public DbSet<Day> days { get; set; }
         public DbSet<Branch> Branches { get; set; }
+        public DbSet<BranchDoctor> BranchDoctors { get; set; }
 
+
+        public DbSet<Employee> Employees { get; set; }
 
     }
 

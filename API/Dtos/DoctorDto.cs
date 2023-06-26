@@ -23,6 +23,6 @@ namespace API.Dtos
 
         public DateTime? HiringDate { get; set; }
         public int? Salary { get; set; }
-        public string departement { get; set; }
+        public string departementName { get; set; }
     }
 }

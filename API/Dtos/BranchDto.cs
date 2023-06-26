@@ -18,6 +18,6 @@ namespace API.Dtos
         public string? openTime { get; set; }
 
         public string? closeTime { get; set; }
-        public string weekend { get; set; }
+        public string weekendDay { get; set; }
     }
 }

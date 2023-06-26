@@ -31,19 +31,71 @@ namespace Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<T> GetByIdAsync(int id)
+        public async Task<T> GetByIdAsync(int id, string includeProperties = null)
         {
-            return await _context.Set<T>().FindAsync(id);
+            IQueryable<T> query = _context.Set<T>();
+
+            if (!string.IsNullOrEmpty(includeProperties))
+            {
+                foreach (var includeProperty in includeProperties.Split
+                    (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(includeProperty);
+                }
+            }
+            return await query.FirstOrDefaultAsync(e => e.Id == id);
+            // return await _context.Set<T>().FindAsync(id);
         }
 
-        public async Task UpdateAsync(T entity)
+        public async Task UpdateAsync(T entity, string includeProperties = null)
         {
-            _context.Entry(entity).State = EntityState.Modified;
+            var existingEntity = await GetByIdAsync(entity.Id, includeProperties);
+
+            if (existingEntity == null)
+            {
+                throw new ArgumentException($"Entity with Id {entity.Id} not found");
+            }
+
+            _context.Entry(existingEntity).CurrentValues.SetValues(entity);
+
+            // Set only the modified fields to the Modified state
+            foreach (var property in _context.Entry(existingEntity).Properties)
+            {
+                if (property.IsModified && property.CurrentValue != null)
+                {
+                    _context.Entry(existingEntity).Property(property.Metadata).IsModified = true;
+                }
+            }
+
+            // Include related entities in the query
+            if (!string.IsNullOrWhiteSpace(includeProperties))
+            {
+                var includePropertiesArray = includeProperties.Split(',', StringSplitOptions.RemoveEmptyEntries);
+
+                foreach (var prop in includePropertiesArray)
+                {
+                    _context.Entry(existingEntity).Reference(prop).Load();
+                }
+            }
+
             await _context.SaveChangesAsync();
+            // _context.Entry(entity).State = EntityState.Modified;
+            // await _context.SaveChangesAsync();
         }
-        public async Task<IReadOnlyList<T>> ListAllAsync()
+        public async Task<IReadOnlyList<T>> ListAllAsync(string includeProperties = null)
         {
-            return await _context.Set<T>().ToListAsync();
+            IQueryable<T> query = _context.Set<T>();
+
+            if (!string.IsNullOrEmpty(includeProperties))
+            {
+                foreach (var includeProperty in includeProperties.Split
+                    (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(includeProperty);
+                }
+            }
+
+            return await query.ToListAsync();
         }
         public async Task<IReadOnlyList<T>> GetEntitiesWithSpec(ISpecification<T> spec)
         {
