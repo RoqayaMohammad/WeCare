@@ -13,22 +13,29 @@ namespace API.Helpers
         {
 
             CreateMap<Employee, EmployeeDto>()
-            .ForMember(dest => dest.Phone2, opt => opt.MapFrom(src => string.IsNullOrEmpty(src.Phone2) ? null : src.Phone2))
-            .ForMember(dest => dest.DepartementName, opt => opt.MapFrom(src => src.Departement != null ? src.Departement.Name : null))
-            .ReverseMap();
+                .ForMember(dest => dest.emp_Id, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.Phone2, opt => opt.MapFrom(src => string.IsNullOrEmpty(src.Phone2) ? null : src.Phone2))
+                .ForMember(dest => dest.jobName, opt => opt.MapFrom(src => src.jobTitle.Title))
+                .ReverseMap();
 
 
             CreateMap<EmployeeDto, Employee>()
-                .ForMember(dest => dest.Departement, opt => opt.MapFrom<DeptNameResolver>())
-                .ForMember(dest => dest.DeptId, opt => opt.MapFrom<DeptIdValueResolver>())
-                ;
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.emp_Id))
+                .ForMember(dest => dest.jobTitle, opt => opt.MapFrom<jobTitleResolver>())
+                .ForMember(dest => dest.jobID, opt => opt.MapFrom<jobIdValueResolver>())
+                .ReverseMap();
 
 
-            
 
-           
-        //
-        CreateMap<Departement, DepartementDto>()
+
+
+
+
+            //
+            CreateMap<JobTitle, JobTitleDto>()
+                .ForMember(dest => dest.job_ID, opt => opt.MapFrom(src => src.Id))
+                .ReverseMap();
+            CreateMap<Departement, DepartementDto>()
                 .ForMember(dest => dest.Dept_ID, opt => opt.MapFrom(src => src.Id))
                 .ReverseMap();
             CreateMap<Day, DayDto>()
@@ -64,6 +71,20 @@ namespace API.Helpers
                 .ForMember(dest => dest.branch, opt => opt.MapFrom<branchNameResolver>())
                 .ReverseMap();
 
+            CreateMap<DoctorShift, DoctorShiftDto>()
+                .ForMember(dest => dest.DoctorShift_ID, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.DoctorName, opt => opt.MapFrom(src => src.branchDoctor.doctor.FName))
+                .ForMember(dest => dest.BranchName, opt => opt.MapFrom(src => src.branchDoctor.branch.Name))
+                .ForMember(dest => dest.dayOfWeek, opt => opt.MapFrom(src => src.day.Name))
+                .ReverseMap();
+
+            CreateMap<DoctorShiftDto, DoctorShift>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.DoctorShift_ID))
+                .ForMember(dest => dest.branchDoctor, opt => opt.MapFrom<branchDoctorNameResolver>())
+                .ForMember(dest => dest.branchDoctor_ID, opt => opt.MapFrom<branchDoctorIdValueResolver>())
+                .ForMember(dest => dest.day_ID, opt => opt.MapFrom<dayIdDSValueResolver>())
+                .ForMember(dest => dest.day, opt => opt.MapFrom<dayNameDSResolver>())
+                .ReverseMap();
 
             CreateMap<Doctor, DoctorDto>()
                 .ForMember(dest => dest.Doctor_ID, opt => opt.MapFrom(src => src.Id))
@@ -175,54 +196,54 @@ namespace API.Helpers
         }
 
     }
-
-    public class DeptNameResolver : IValueResolver<EmployeeDto, Employee, Departement>
+    public class dayIdDSValueResolver : IValueResolver<DoctorShiftDto, DoctorShift, int>
     {
         private readonly storeContext _context;
 
-        public DeptNameResolver(storeContext context)
+        public dayIdDSValueResolver(storeContext context)
         {
             _context = context;
         }
-
-        public Departement Resolve(EmployeeDto source, Employee destination, Departement destMember, ResolutionContext context)
+        public int Resolve(DoctorShiftDto source, DoctorShift destination, int destMember, ResolutionContext context)
         {
-            if (source.DepartementName != null)
+            if (source.dayOfWeek != null)
             {
-                var empDepart = _context.Departements.FirstOrDefault(pc => pc.Name == source.DepartementName);
-                if (empDepart != null)
+                var day = _context.days.FirstOrDefault(pc => pc.Name == source.dayOfWeek);
+                if (day != null)
                 {
-                    destination.DeptId = empDepart.Id;
-                    destination.Departement = empDepart;
-                    return destination.Departement;
-                }
-            }
+                    destination.day_ID = day.Id;
 
-            return destination.Departement;
-        }
-    }
-    public class DeptIdValueResolver : IValueResolver<EmployeeDto, Employee, int>
-    {
-        private readonly storeContext _context;
-
-        public DeptIdValueResolver(storeContext context)
-        {
-            _context = context;
-        }
-        public int Resolve(EmployeeDto source, Employee destination, int destMember, ResolutionContext context)
-        {
-            if (source.DepartementName != null)
-            {
-                var empDept = _context.Departements.FirstOrDefault(pc => pc.Name == source.DepartementName);
-                if (empDept != null)
-                {
-                    destination.DeptId = empDept.Id;
-
-                    return destination.DeptId;
+                    return destination.day_ID;
                 }
             }
 
             return 1;
+        }
+    }
+
+    public class dayNameDSResolver : IValueResolver<DoctorShiftDto, DoctorShift, Day>
+    {
+        private readonly storeContext _context;
+
+        public dayNameDSResolver(storeContext context)
+        {
+            _context = context;
+        }
+
+        Day IValueResolver<DoctorShiftDto, DoctorShift, Day>.Resolve(DoctorShiftDto source, DoctorShift destination, Day destMember, ResolutionContext context)
+        {
+            if (source.dayOfWeek != null)
+            {
+                var day = _context.days.FirstOrDefault(pc => pc.Name == source.dayOfWeek);
+                if (day != null)
+                {
+                    destination.day_ID = day.Id;
+                    destination.day = day;
+                    return destination.day;
+                }
+            }
+
+            throw new NotImplementedException();
         }
     }
     public class doctorNameResolver : IValueResolver<BranchDoctorDto, BranchDoctor, Doctor>
@@ -324,4 +345,107 @@ namespace API.Helpers
         }
     }
 
+    public class branchDoctorNameResolver : IValueResolver<DoctorShiftDto, DoctorShift, BranchDoctor>
+    {
+        private readonly storeContext _context;
+
+        public branchDoctorNameResolver(storeContext context)
+        {
+            _context = context;
+        }
+
+        public BranchDoctor Resolve(DoctorShiftDto source, DoctorShift destination, BranchDoctor destMember, ResolutionContext context)
+        {
+            if (source.BranchName != null && source.DoctorName != null)
+            {
+                var branchDoctor = _context.BranchDoctors.FirstOrDefault(pc => pc.branch.Name == source.BranchName
+                && pc.doctor.FName == source.DoctorName);
+
+                if (branchDoctor != null)
+                {
+                    destination.branchDoctor_ID = branchDoctor.Id;
+                    destination.branchDoctor = branchDoctor;
+                    return destination.branchDoctor;
+                }
+            }
+
+            return destination.branchDoctor;
+        }
+    }
+    public class branchDoctorIdValueResolver : IValueResolver<DoctorShiftDto, DoctorShift, int>
+    {
+        private readonly storeContext _context;
+
+        public branchDoctorIdValueResolver(storeContext context)
+        {
+            _context = context;
+        }
+        public int Resolve(DoctorShiftDto source, DoctorShift destination, int destMember, ResolutionContext context)
+        {
+            if (source.BranchName != null && source.DoctorName != null)
+            {
+                var branchDoctor = _context.BranchDoctors.FirstOrDefault(pc => pc.branch.Name == source.BranchName
+                && pc.doctor.FName == source.DoctorName);
+
+                if (branchDoctor != null)
+                {
+                    destination.branchDoctor_ID = branchDoctor.Id;
+
+                    return destination.branchDoctor_ID;
+                }
+            }
+
+            return 1;
+        }
+    }
+
+    public class jobTitleResolver : IValueResolver<EmployeeDto, Employee, JobTitle>
+    {
+        private readonly storeContext _context;
+
+        public jobTitleResolver(storeContext context)
+        {
+            _context = context;
+        }
+
+        public JobTitle Resolve(EmployeeDto source, Employee destination, JobTitle destMember, ResolutionContext context)
+        {
+            if (source.jobName != null)
+            {
+                var doctor = _context.JobTitles.FirstOrDefault(pc => pc.Title == source.jobName);
+                if (doctor != null)
+                {
+                    destination.jobID = doctor.Id;
+                    destination.jobTitle = doctor;
+                    return destination.jobTitle;
+                }
+            }
+
+            return destination.jobTitle;
+        }
+    }
+    public class jobIdValueResolver : IValueResolver<EmployeeDto, Employee, int>
+    {
+        private readonly storeContext _context;
+
+        public jobIdValueResolver(storeContext context)
+        {
+            _context = context;
+        }
+        public int Resolve(EmployeeDto source, Employee destination, int destMember, ResolutionContext context)
+        {
+            if (source.jobName != null)
+            {
+                var empDept = _context.JobTitles.FirstOrDefault(pc => pc.Title == source.jobName);
+                if (empDept != null)
+                {
+                    destination.jobID = empDept.Id;
+
+                    return destination.jobID;
+                }
+            }
+
+            return 1;
+        }
+    }
 }

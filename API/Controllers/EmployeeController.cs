@@ -2,6 +2,7 @@
 using AutoMapper;
 using Core.Interfaces;
 using Core.Models;
+using Core.Specifictions;
 using Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -31,50 +32,25 @@ namespace API.Controllers
         public async Task<ActionResult<EmployeeDto>> GetById(int id)
         {
 
-            var emp = await _empRepo.GetByIdAsync(id, includeProperties: "Departement");
-            return _mapper.Map<Employee, EmployeeDto>(emp);
-            // var emp = await _empRepo.GetByIdAsync(id);
-            // return _mapper.Map<Employee, EmployeeDto>(emp);
+            var spec = new EmpWithJobSpecification(id);
+            var emp = await _empRepo.GetEntityWithSpec(spec);
+            return _mapper.Map<Core.Models.Employee, EmployeeDto>(emp);
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetAll()
+        public async Task<ActionResult<EmployeeDto>> GetAll([FromQuery] EmpSpecParams empParams)
         {
-
-            var employees = await _empRepo.ListAllAsync(includeProperties: "Departement");
-            var employeeDtos = _mapper.Map<IEnumerable<EmployeeDto>>(employees);
-            return Ok(employeeDtos);
+            var spec = new EmpWithJobSpecification(empParams);
+            var emps = await _empRepo.GetEntitiesWithSpec(spec);
+            var data = _mapper.Map<IReadOnlyList<Core.Models.Employee>, IReadOnlyList<EmployeeDto>>(emps);
+            return Ok(data);
         }
 
 
         [HttpPost]
         public async Task<ActionResult<EmployeeDto>> Create(EmployeeDto empDto)
         {
-
-            //var employee = new Employee
-            //{
-            //    jobTitle = empDto.jobTitle,
-            //    FirstName = empDto.FirstName,
-            //    LastName = empDto.LastName,
-            //    Address = empDto.Address,
-            //    Age = empDto.Age,
-            //    Phone1 = empDto.Phone1,
-            //    Phone2 = empDto.Phone2,
-            //    Salary = empDto.Salary
-            //};
-            //var createdEmployee = await _empRepo.AddAsync(employee);
-            //var createdEmployeeDto = new EmployeeDto
-            //{
-            //    jobTitle = createdEmployee.jobTitle,
-            //    FirstName = createdEmployee.FirstName,
-            //    LastName = createdEmployee.LastName,
-            //    Address = createdEmployee.Address,
-            //    Age = createdEmployee.Age,
-            //    Phone1 = createdEmployee.Phone1,
-            //    Phone2 = createdEmployee.Phone2,
-            //    Salary = createdEmployee.Salary
-            //};
-            //return CreatedAtAction(nameof(GetById), new { id = createdEmployee.Id }, createdEmployeeDto);
+       
             if (empDto == null)
             {
                 return BadRequest("EmpDto cannot be null");
@@ -93,38 +69,22 @@ namespace API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<EmployeeDto>> UpdateEmployee(int id, EmployeeDto empDto)
+        public async Task<ActionResult<EmployeeDto>> UpdateProduct(int id, EmployeeDto empDto)
         {
-            if (empDto == null)
-            {
-                return BadRequest("EmpDto cannot be null");
-            }
+            // Map the ProductDto to a Product entity
+            var productEntity = _mapper.Map<Core.Models.Employee>(empDto);
+            productEntity.Id = id;
 
-            if (string.IsNullOrWhiteSpace(empDto.FirstName))
-            {
-                return BadRequest("Employee first name cannot be empty or whitespace.");
-            }
-
-            var existingEmpEntity = await _empRepo.GetByIdAsync(id);
-
-            if (existingEmpEntity == null)
-            {
-                return NotFound($"Employee with Id {id} not found");
-            }
-
-            // Map the updated fields from the EmployeeDto to the existing Employee entity
-            _mapper.Map(empDto, existingEmpEntity);
-
-            await _empRepo.UpdateAsync(existingEmpEntity);
+            // Update the Product entity in the database
+            await _empRepo.UpdateAsync(productEntity);
 
             // Save changes to the database
             await _unitOfWork.Complete();
 
-            // Map the updated Employee entity back to a EmployeeDto
-            var updatedEmpDto = _mapper.Map<EmployeeDto>(existingEmpEntity);
+            // Map the updated Product entity back to a ProductDto
+            var updatedProductDto = _mapper.Map<EmployeeDto>(productEntity);
 
-            return Ok(updatedEmpDto);
-
+            return Ok(updatedProductDto);
         }
 
         [HttpDelete("{id}")]

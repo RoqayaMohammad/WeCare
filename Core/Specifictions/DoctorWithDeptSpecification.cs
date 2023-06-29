@@ -12,6 +12,7 @@ namespace Core.Specifictions
         public DoctorWithDeptSpecification(DoctorSpecParams doctorParams) : base(x =>
         (string.IsNullOrEmpty(doctorParams.FNsearch) || x.FName.ToLower().Contains(doctorParams.FNsearch)) &&
         (string.IsNullOrEmpty(doctorParams.LNsearch) || x.LName.ToLower().Contains(doctorParams.LNsearch)) &&
+        (string.IsNullOrEmpty(doctorParams.PhoneSearch) || (x.Phone1.ToLower().Contains(doctorParams.PhoneSearch) || x.Phone2.ToLower().Contains(doctorParams.PhoneSearch))) &&
         (!doctorParams.deptId.HasValue || x.DeptID == doctorParams.deptId)
         )
 

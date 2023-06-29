@@ -24,7 +24,9 @@ namespace Infrastructure
         public DbSet<Day> days { get; set; }
         public DbSet<Branch> Branches { get; set; }
         public DbSet<BranchDoctor> BranchDoctors { get; set; }
+        public DbSet<DoctorShift> DoctorShifts { get; set; }
 
+        public DbSet<JobTitle> JobTitles { get; set; }
 
         public DbSet<Employee> Employees { get; set; }
 

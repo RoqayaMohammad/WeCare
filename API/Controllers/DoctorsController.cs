@@ -49,11 +49,11 @@ namespace API.Controllers
         {
             if (doctorDto == null)
             {
-                return BadRequest("ProductDto cannot be null");
+                return BadRequest("DoctorDto cannot be null");
             }
             if (string.IsNullOrWhiteSpace(doctorDto.FName))
             {
-                throw new ArgumentException("Product name cannot be empty or whitespace.", nameof(doctorDto));
+                throw new ArgumentException("Doctor name cannot be empty or whitespace.", nameof(doctorDto));
             }
 
             var productEntity = _mapper.Map<Core.Models.Doctor>(doctorDto);

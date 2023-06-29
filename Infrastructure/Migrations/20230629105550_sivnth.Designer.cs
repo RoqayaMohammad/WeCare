@@ -4,6 +4,7 @@ using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(storeContext))]
-    partial class storeContextModelSnapshot : ModelSnapshot
+    [Migration("20230629105550_sivnth")]
+    partial class sivnth
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -199,11 +202,11 @@ namespace Infrastructure.Migrations
                     b.Property<int>("day_ID")
                         .HasColumnType("int");
 
-                    b.Property<string>("endTime")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime?>("endTime")
+                        .HasColumnType("datetime2");
 
-                    b.Property<string>("startTime")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime?>("startTime")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -229,6 +232,12 @@ namespace Infrastructure.Migrations
                     b.Property<int>("Age")
                         .HasColumnType("int");
 
+                    b.Property<int>("DepartementId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DeptId")
+                        .HasColumnType("int");
+
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -248,35 +257,15 @@ namespace Infrastructure.Migrations
                     b.Property<decimal>("Salary")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("jobID")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("jobTitleId")
-                        .HasColumnType("int");
+                    b.Property<string>("jobTitle")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("jobTitleId");
+                    b.HasIndex("DepartementId");
 
                     b.ToTable("Employees");
-                });
-
-            modelBuilder.Entity("Core.Models.JobTitle", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("JobTitles");
                 });
 
             modelBuilder.Entity("Core.Models.Patient", b =>
@@ -373,11 +362,13 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Core.Models.Employee", b =>
                 {
-                    b.HasOne("Core.Models.JobTitle", "jobTitle")
+                    b.HasOne("Core.Models.Departement", "Departement")
                         .WithMany()
-                        .HasForeignKey("jobTitleId");
+                        .HasForeignKey("DepartementId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("jobTitle");
+                    b.Navigation("Departement");
                 });
 #pragma warning restore 612, 618
         }
