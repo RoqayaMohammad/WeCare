@@ -4,6 +4,7 @@ using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(storeContext))]
-    partial class storeContextModelSnapshot : ModelSnapshot
+    [Migration("20230705061719_AppointmentIssues")]
+    partial class AppointmentIssues
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -42,9 +45,6 @@ namespace Infrastructure.Migrations
                     b.Property<int>("Serv_doctor_id")
                         .HasColumnType("int");
 
-                    b.Property<int>("ServiceDoctorId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -66,7 +66,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("Patient_id");
 
-                    b.HasIndex("ServiceDoctorId");
+                    b.HasIndex("Serv_doctor_id");
 
                     b.HasIndex("emp_id");
 
@@ -538,9 +538,9 @@ namespace Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("Core.Models.ServiceDoctor", "ServiceDoctor")
-                        .WithMany()
-                        .HasForeignKey("ServiceDoctorId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .WithMany("Appointments")
+                        .HasForeignKey("Serv_doctor_id")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("Core.Models.Employee", "Employee")
@@ -711,6 +711,11 @@ namespace Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("Core.Models.Patient", b =>
+                {
+                    b.Navigation("Appointments");
+                });
+
+            modelBuilder.Entity("Core.Models.ServiceDoctor", b =>
                 {
                     b.Navigation("Appointments");
                 });
