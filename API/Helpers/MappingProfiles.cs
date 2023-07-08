@@ -14,8 +14,7 @@ namespace API.Helpers
 
             CreateMap<Employee, EmployeeDto>()
                 .ForMember(dest => dest.emp_Id, opt => opt.MapFrom(src => src.Id))
-                .ForMember(dest => dest.Phone2, opt => opt.MapFrom(src => string.IsNullOrEmpty(src.Phone2) ? null : src.Phone2))
-                .ForMember(dest => dest.jobName, opt => opt.MapFrom(src => src.jobTitle.Title))
+                .ForMember(dest => dest.jobName, opt => opt.MapFrom(src => src.jobTitle != null ? src.jobTitle.Title: null))
                 .ReverseMap();
 
 
@@ -47,7 +46,7 @@ namespace API.Helpers
 
             CreateMap<Branch, BranchDto>()
                 .ForMember(dest => dest.Branch_ID, opt => opt.MapFrom(src => src.Id))
-                .ForMember(dest => dest.weekendDay, opt => opt.MapFrom(src => src.weekend.Name))
+                .ForMember(dest => dest.weekendDay, opt => opt.MapFrom(src => src.weekend != null? src.weekend.Name : null))
                 .ReverseMap();
 
 
@@ -88,7 +87,7 @@ namespace API.Helpers
 
             CreateMap<Doctor, DoctorDto>()
                 .ForMember(dest => dest.Doctor_ID, opt => opt.MapFrom(src => src.Id))
-                .ForMember(dest => dest.departementName, opt => opt.MapFrom(src => src.departement.Name))
+                .ForMember(dest => dest.departementName, opt => opt.MapFrom(src => src.departement != null ? src.departement.Name : null))
                 .ReverseMap();
 
             CreateMap<DoctorDto, Doctor>()
@@ -421,7 +420,7 @@ namespace API.Helpers
                 }
             }
 
-            return destination.jobTitle;
+            throw new NotImplementedException();
         }
     }
     public class jobIdValueResolver : IValueResolver<EmployeeDto, Employee, int>
