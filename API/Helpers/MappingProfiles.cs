@@ -12,6 +12,26 @@ namespace API.Helpers
         public MappingProfiles()
         {
 
+            CreateMap<Appointment, AppointmentDto>()
+                .ForMember(dest => dest.AppId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.PatientName, opt => opt.MapFrom(src => src.Patient.FName))
+                .ForMember(dest => dest.BranchName, opt => opt.MapFrom(src => src.Branch.Name))
+                .ForMember(dest => dest.EmployeeName, opt => opt.MapFrom(src => src.Employee.FirstName))
+                .ReverseMap();
+
+            CreateMap<AppointmentDto, Appointment>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.AppId))
+                .ForMember(dest => dest.Branch, opt => opt.MapFrom<BranchResolver>())
+                .ForMember(dest => dest.Branch_id, opt => opt.MapFrom<BranchIdValueResolver>())
+                .ForMember(dest => dest.Employee, opt => opt.MapFrom<EmployeeResolver>())
+                .ForMember(dest => dest.emp_id, opt => opt.MapFrom<EmployeeIdValueResolver>())
+                .ForMember(dest => dest.Patient, opt => opt.MapFrom<PatientResolver>())
+                .ForMember(dest => dest.Patient_id, opt => opt.MapFrom<PatientIdValueResolver>())
+                .ReverseMap();
+
+
+            //
+
             CreateMap<Employee, EmployeeDto>()
                 .ForMember(dest => dest.emp_Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Phone2, opt => opt.MapFrom(src => string.IsNullOrEmpty(src.Phone2) ? null : src.Phone2))
@@ -157,7 +177,7 @@ namespace API.Helpers
             {
                 if (source.weekendDay != null)
                 {
-                    var day = _context.days.FirstOrDefault(pc => pc.Name == source.weekendDay);
+                    var day = _context.Days.FirstOrDefault(pc => pc.Name == source.weekendDay);
                     if (day != null)
                     {
                         destination.weekendID = day.Id;
@@ -182,7 +202,7 @@ namespace API.Helpers
             {
                 if (source.weekendDay != null)
                 {
-                    var day = _context.days.FirstOrDefault(pc => pc.Name == source.weekendDay);
+                    var day = _context.Days.FirstOrDefault(pc => pc.Name == source.weekendDay);
                     if (day != null)
                     {
                         destination.weekendID = day.Id;
@@ -208,7 +228,7 @@ namespace API.Helpers
         {
             if (source.dayOfWeek != null)
             {
-                var day = _context.days.FirstOrDefault(pc => pc.Name == source.dayOfWeek);
+                var day = _context.Days.FirstOrDefault(pc => pc.Name == source.dayOfWeek);
                 if (day != null)
                 {
                     destination.day_ID = day.Id;
@@ -234,7 +254,7 @@ namespace API.Helpers
         {
             if (source.dayOfWeek != null)
             {
-                var day = _context.days.FirstOrDefault(pc => pc.Name == source.dayOfWeek);
+                var day = _context.Days.FirstOrDefault(pc => pc.Name == source.dayOfWeek);
                 if (day != null)
                 {
                     destination.day_ID = day.Id;
@@ -448,4 +468,162 @@ namespace API.Helpers
             return 1;
         }
     }
+    //
+
+    public class BranchResolver : IValueResolver<AppointmentDto, Appointment, Branch>
+    {
+        private readonly storeContext _context;
+
+        public BranchResolver(storeContext context)
+        {
+            _context = context;
+        }
+
+        public Branch Resolve(AppointmentDto source, Appointment destination, Branch destMember, ResolutionContext context)
+        {
+            if (source.BranchName != null)
+            {
+                var brach = _context.Branches.FirstOrDefault(pc => pc.Name == source.BranchName);
+                if (brach != null)
+                {
+                    destination.Branch_id = brach.Id;
+                    destination.Branch = brach;
+                    return destination.Branch;
+                }
+            }
+
+            return destination.Branch;
+        }
+    }
+
+    public class BranchIdValueResolver : IValueResolver<AppointmentDto, Appointment, int>
+    {
+        private readonly storeContext _context;
+
+        public BranchIdValueResolver(storeContext context)
+        {
+            _context = context;
+        }
+        public int Resolve(AppointmentDto source, Appointment destination, int destMember, ResolutionContext context)
+        {
+            if (source.BranchName != null)
+            {
+                var AppBrach = _context.Branches.FirstOrDefault(pc => pc.Name == source.BranchName);
+                if (AppBrach != null)
+                {
+                    destination.Branch_id = AppBrach.Id;
+
+                    return destination.Branch_id;
+                }
+            }
+
+            return 1;
+        }
+    }
+
+    // patient
+    public class PatientResolver : IValueResolver<AppointmentDto, Appointment, Patient>
+    {
+        private readonly storeContext _context;
+
+        public PatientResolver(storeContext context)
+        {
+            _context = context;
+        }
+
+        public Patient Resolve(AppointmentDto source, Appointment destination, Patient destMember, ResolutionContext context)
+        {
+            if (source.PatientName != null)
+            {
+                var patient = _context.Patients.FirstOrDefault(pc => pc.FName == source.PatientName);
+                if (patient != null)
+                {
+                    destination.Patient_id = patient.Id;
+                    destination.Patient = patient;
+                    return destination.Patient;
+                }
+            }
+
+            return destination.Patient;
+        }
+    }
+
+    public class PatientIdValueResolver : IValueResolver<AppointmentDto, Appointment, int>
+    {
+        private readonly storeContext _context;
+
+        public PatientIdValueResolver(storeContext context)
+        {
+            _context = context;
+        }
+        public int Resolve(AppointmentDto source, Appointment destination, int destMember, ResolutionContext context)
+        {
+            if (source.PatientName != null)
+            {
+                var AppPatient = _context.Patients.FirstOrDefault(pc => pc.FName == source.PatientName);
+                if (AppPatient != null)
+                {
+                    destination.Patient_id = AppPatient.Id;
+
+                    return destination.Patient_id;
+                }
+            }
+
+            return 1;
+        }
+    }
+
+    //Employee
+
+    public class EmployeeResolver : IValueResolver<AppointmentDto, Appointment, Employee>
+    {
+        private readonly storeContext _context;
+
+        public EmployeeResolver(storeContext context)
+        {
+            _context = context;
+        }
+
+        public Employee Resolve(AppointmentDto source, Appointment destination, Employee destMember, ResolutionContext context)
+        {
+            if (source.EmployeeName != null)
+            {
+                var emp = _context.Employees.FirstOrDefault(pc => pc.FirstName == source.EmployeeName);
+                if (emp != null)
+                {
+                    destination.emp_id = emp.Id;
+                    destination.Employee = emp;
+                    return destination.Employee;
+                }
+            }
+
+            return destination.Employee;
+        }
+    }
+
+    public class EmployeeIdValueResolver : IValueResolver<AppointmentDto, Appointment, int>
+    {
+        private readonly storeContext _context;
+
+        public EmployeeIdValueResolver(storeContext context)
+        {
+            _context = context;
+        }
+        public int Resolve(AppointmentDto source, Appointment destination, int destMember, ResolutionContext context)
+        {
+            if (source.EmployeeName != null)
+            {
+                var AppEmp = _context.Employees.FirstOrDefault(pc => pc.FirstName == source.EmployeeName);
+                if (AppEmp != null)
+                {
+                    destination.emp_id = AppEmp.Id;
+
+                    return destination.emp_id;
+                }
+            }
+
+            return 1;
+        }
+    }
+
 }

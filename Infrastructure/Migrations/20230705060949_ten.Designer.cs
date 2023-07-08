@@ -4,6 +4,7 @@ using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(storeContext))]
-    partial class storeContextModelSnapshot : ModelSnapshot
+    [Migration("20230705060949_ten")]
+    partial class ten
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,19 +33,25 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("BranchId")
+                        .HasColumnType("int");
+
                     b.Property<int>("Branch_id")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PatientId")
+                        .HasColumnType("int");
+
                     b.Property<int>("Patient_id")
                         .HasColumnType("int");
 
                     b.Property<int>("Serv_doctor_id")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ServiceDoctorId")
                         .HasColumnType("int");
 
                     b.Property<string>("Status")
@@ -62,13 +71,13 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Branch_id");
+                    b.HasIndex("BranchId");
 
-                    b.HasIndex("Patient_id");
+                    b.HasIndex("EmployeeId");
 
-                    b.HasIndex("ServiceDoctorId");
+                    b.HasIndex("PatientId");
 
-                    b.HasIndex("emp_id");
+                    b.HasIndex("Serv_doctor_id");
 
                     b.ToTable("Appoinments");
                 });
@@ -526,26 +535,26 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Core.Models.Appointment", b =>
                 {
                     b.HasOne("Core.Models.Branch", "Branch")
-                        .WithMany("Appointments")
-                        .HasForeignKey("Branch_id")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("Core.Models.Patient", "Patient")
-                        .WithMany("Appointments")
-                        .HasForeignKey("Patient_id")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("Core.Models.ServiceDoctor", "ServiceDoctor")
                         .WithMany()
-                        .HasForeignKey("ServiceDoctorId")
+                        .HasForeignKey("BranchId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Core.Models.Employee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Core.Models.Patient", "Patient")
+                        .WithMany()
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Core.Models.ServiceDoctor", "ServiceDoctor")
                         .WithMany("Appointments")
-                        .HasForeignKey("emp_id")
+                        .HasForeignKey("Serv_doctor_id")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
@@ -700,17 +709,7 @@ namespace Infrastructure.Migrations
                     b.Navigation("Service");
                 });
 
-            modelBuilder.Entity("Core.Models.Branch", b =>
-                {
-                    b.Navigation("Appointments");
-                });
-
-            modelBuilder.Entity("Core.Models.Employee", b =>
-                {
-                    b.Navigation("Appointments");
-                });
-
-            modelBuilder.Entity("Core.Models.Patient", b =>
+            modelBuilder.Entity("Core.Models.ServiceDoctor", b =>
                 {
                     b.Navigation("Appointments");
                 });

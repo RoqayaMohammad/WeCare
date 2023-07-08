@@ -34,5 +34,7 @@ namespace Core.Models
         public Day? weekend { get; set; }
         public int weekendID { get; set; }
 
+        public ICollection<Appointment>? Appointments { get; set; }
+
     }
 }
