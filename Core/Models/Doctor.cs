@@ -45,5 +45,10 @@ namespace Core.Models
 
         public Departement? departement { get; set; }
         public int DeptID { get; set; }
+
+        public string GetFullName()
+        {
+            return $"{FName}, {LName}";
+        }
     }
 }

@@ -18,6 +18,5 @@ namespace Core.Models
             public string Phone2 { get; set; }
             public decimal Salary { get; set; }
 
-        public ICollection<Appointment>? Appointments { get; set; }
     }
 }

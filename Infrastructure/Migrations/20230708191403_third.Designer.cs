@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(storeContext))]
-    [Migration("20230705061331_AppointmentServDoctor")]
-    partial class AppointmentServDoctor
+    [Migration("20230708191403_third")]
+    partial class third
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,30 +33,21 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("BranchId")
-                        .HasColumnType("int");
-
                     b.Property<int>("Branch_id")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("EmployeeId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PatientId")
-                        .HasColumnType("int");
+                    b.Property<string>("Date")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Patient_id")
                         .HasColumnType("int");
 
-                    b.Property<int>("Serv_doctor_id")
+                    b.Property<int>("ServiceDoctorId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.Property<string>("TimeEnd")
                         .IsRequired()
@@ -71,13 +62,13 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BranchId");
+                    b.HasIndex("Branch_id");
 
-                    b.HasIndex("EmployeeId");
+                    b.HasIndex("Patient_id");
 
-                    b.HasIndex("PatientId");
+                    b.HasIndex("ServiceDoctorId");
 
-                    b.HasIndex("Serv_doctor_id");
+                    b.HasIndex("emp_id");
 
                     b.ToTable("Appoinments");
                 });
@@ -90,7 +81,7 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("BranchId")
+                    b.Property<int?>("BranchId")
                         .HasColumnType("int");
 
                     b.Property<int>("Branch_id")
@@ -99,7 +90,7 @@ namespace Infrastructure.Migrations
                     b.Property<int>("Emp_id")
                         .HasColumnType("int");
 
-                    b.Property<int>("EmployeeId")
+                    b.Property<int?>("EmployeeId")
                         .HasColumnType("int");
 
                     b.Property<string>("Notes")
@@ -164,13 +155,13 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("BranchId")
+                    b.Property<int?>("BranchId")
                         .HasColumnType("int");
 
                     b.Property<int>("Branch_id")
                         .HasColumnType("int");
 
-                    b.Property<int>("DepartementId")
+                    b.Property<int?>("DepartementId")
                         .HasColumnType("int");
 
                     b.Property<int>("Dept_id")
@@ -347,7 +338,7 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("BrachEmpId")
+                    b.Property<int?>("BrachEmpId")
                         .HasColumnType("int");
 
                     b.Property<int>("Branch_emp_id")
@@ -361,9 +352,17 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("dayId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("day_ID")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("BrachEmpId");
+
+                    b.HasIndex("dayId");
 
                     b.ToTable("EmpShifts");
                 });
@@ -479,10 +478,10 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("Debt_id")
+                    b.Property<int?>("DepartementId")
                         .HasColumnType("int");
 
-                    b.Property<int>("DepartementId")
+                    b.Property<int>("Dept_id")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -507,7 +506,7 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("BranchDoctorId")
+                    b.Property<int?>("BranchDoctorId")
                         .HasColumnType("int");
 
                     b.Property<int>("Branch_doctor_id")
@@ -517,7 +516,7 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ServiceId")
+                    b.Property<int?>("ServiceId")
                         .HasColumnType("int");
 
                     b.Property<int>("serv_id")
@@ -536,26 +535,26 @@ namespace Infrastructure.Migrations
                 {
                     b.HasOne("Core.Models.Branch", "Branch")
                         .WithMany()
-                        .HasForeignKey("BranchId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Core.Models.Employee", "Employee")
-                        .WithMany()
-                        .HasForeignKey("EmployeeId")
+                        .HasForeignKey("Branch_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Core.Models.Patient", "Patient")
                         .WithMany()
-                        .HasForeignKey("PatientId")
+                        .HasForeignKey("Patient_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Core.Models.ServiceDoctor", "ServiceDoctor")
                         .WithMany("Appointments")
-                        .HasForeignKey("Serv_doctor_id")
+                        .HasForeignKey("ServiceDoctorId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Core.Models.Employee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("emp_id")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Branch");
@@ -571,15 +570,11 @@ namespace Infrastructure.Migrations
                 {
                     b.HasOne("Core.Models.Branch", "Branch")
                         .WithMany()
-                        .HasForeignKey("BranchId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("BranchId");
 
                     b.HasOne("Core.Models.Employee", "Employee")
                         .WithMany()
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("EmployeeId");
 
                     b.Navigation("Branch");
 
@@ -601,15 +596,11 @@ namespace Infrastructure.Migrations
                 {
                     b.HasOne("Core.Models.Branch", "Branch")
                         .WithMany()
-                        .HasForeignKey("BranchId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("BranchId");
 
                     b.HasOne("Core.Models.Departement", "Departement")
                         .WithMany()
-                        .HasForeignKey("DepartementId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("DepartementId");
 
                     b.Navigation("Branch");
 
@@ -663,11 +654,15 @@ namespace Infrastructure.Migrations
                 {
                     b.HasOne("Core.Models.BrachEmp", "BrachEmp")
                         .WithMany()
-                        .HasForeignKey("BrachEmpId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("BrachEmpId");
+
+                    b.HasOne("Core.Models.Day", "day")
+                        .WithMany()
+                        .HasForeignKey("dayId");
 
                     b.Navigation("BrachEmp");
+
+                    b.Navigation("day");
                 });
 
             modelBuilder.Entity("Core.Models.Employee", b =>
@@ -683,9 +678,7 @@ namespace Infrastructure.Migrations
                 {
                     b.HasOne("Core.Models.Departement", "Departement")
                         .WithMany()
-                        .HasForeignKey("DepartementId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("DepartementId");
 
                     b.Navigation("Departement");
                 });
@@ -694,15 +687,11 @@ namespace Infrastructure.Migrations
                 {
                     b.HasOne("Core.Models.BranchDoctor", "BranchDoctor")
                         .WithMany()
-                        .HasForeignKey("BranchDoctorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("BranchDoctorId");
 
                     b.HasOne("Core.Models.Service", "Service")
                         .WithMany()
-                        .HasForeignKey("ServiceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ServiceId");
 
                     b.Navigation("BranchDoctor");
 

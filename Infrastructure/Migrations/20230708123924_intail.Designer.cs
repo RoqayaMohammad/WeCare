@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(storeContext))]
-    [Migration("20230629123955_eight")]
-    partial class eight
+    [Migration("20230708123924_intail")]
+    partial class intail
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,88 @@ namespace Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Core.Models.Appointment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Branch_id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Date")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Patient_id")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ServiceDoctorId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TimeEnd")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TimeStart")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("emp_id")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Branch_id");
+
+                    b.HasIndex("Patient_id");
+
+                    b.HasIndex("ServiceDoctorId");
+
+                    b.HasIndex("emp_id");
+
+                    b.ToTable("Appoinments");
+                });
+
+            modelBuilder.Entity("Core.Models.BrachEmp", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("BranchId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Branch_id")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Emp_id")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("EmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BranchId");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.ToTable("BrachEmps");
+                });
 
             modelBuilder.Entity("Core.Models.Branch", b =>
                 {
@@ -64,6 +146,38 @@ namespace Infrastructure.Migrations
                     b.HasIndex("weekendID");
 
                     b.ToTable("Branches");
+                });
+
+            modelBuilder.Entity("Core.Models.BranchDept", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("BranchId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Branch_id")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("DepartementId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Dept_id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BranchId");
+
+                    b.HasIndex("DepartementId");
+
+                    b.ToTable("BranchDepts");
                 });
 
             modelBuilder.Entity("Core.Models.BranchDoctor", b =>
@@ -108,7 +222,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("days");
+                    b.ToTable("Days");
                 });
 
             modelBuilder.Entity("Core.Models.Departement", b =>
@@ -217,6 +331,43 @@ namespace Infrastructure.Migrations
                     b.ToTable("DoctorShifts");
                 });
 
+            modelBuilder.Entity("Core.Models.EmpShift", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("BrachEmpId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Branch_emp_id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("EndTime")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StartTime")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("dayId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("day_ID")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BrachEmpId");
+
+                    b.HasIndex("dayId");
+
+                    b.ToTable("EmpShifts");
+                });
+
             modelBuilder.Entity("Core.Models.Employee", b =>
                 {
                     b.Property<int>("Id")
@@ -320,6 +471,117 @@ namespace Infrastructure.Migrations
                     b.ToTable("Patients");
                 });
 
+            modelBuilder.Entity("Core.Models.Service", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Debt_id")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("DepartementId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DepartementId");
+
+                    b.ToTable("Services");
+                });
+
+            modelBuilder.Entity("Core.Models.ServiceDoctor", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("BranchDoctorId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Branch_doctor_id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ServiceId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("serv_id")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BranchDoctorId");
+
+                    b.HasIndex("ServiceId");
+
+                    b.ToTable("ServicesDoctors");
+                });
+
+            modelBuilder.Entity("Core.Models.Appointment", b =>
+                {
+                    b.HasOne("Core.Models.Branch", "Branch")
+                        .WithMany()
+                        .HasForeignKey("Branch_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Core.Models.Patient", "Patient")
+                        .WithMany()
+                        .HasForeignKey("Patient_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Core.Models.ServiceDoctor", "ServiceDoctor")
+                        .WithMany("Appointments")
+                        .HasForeignKey("ServiceDoctorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Core.Models.Employee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("emp_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Branch");
+
+                    b.Navigation("Employee");
+
+                    b.Navigation("Patient");
+
+                    b.Navigation("ServiceDoctor");
+                });
+
+            modelBuilder.Entity("Core.Models.BrachEmp", b =>
+                {
+                    b.HasOne("Core.Models.Branch", "Branch")
+                        .WithMany()
+                        .HasForeignKey("BranchId");
+
+                    b.HasOne("Core.Models.Employee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeId");
+
+                    b.Navigation("Branch");
+
+                    b.Navigation("Employee");
+                });
+
             modelBuilder.Entity("Core.Models.Branch", b =>
                 {
                     b.HasOne("Core.Models.Day", "weekend")
@@ -329,6 +591,21 @@ namespace Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("weekend");
+                });
+
+            modelBuilder.Entity("Core.Models.BranchDept", b =>
+                {
+                    b.HasOne("Core.Models.Branch", "Branch")
+                        .WithMany()
+                        .HasForeignKey("BranchId");
+
+                    b.HasOne("Core.Models.Departement", "Departement")
+                        .WithMany()
+                        .HasForeignKey("DepartementId");
+
+                    b.Navigation("Branch");
+
+                    b.Navigation("Departement");
                 });
 
             modelBuilder.Entity("Core.Models.BranchDoctor", b =>
@@ -374,6 +651,21 @@ namespace Infrastructure.Migrations
                     b.Navigation("day");
                 });
 
+            modelBuilder.Entity("Core.Models.EmpShift", b =>
+                {
+                    b.HasOne("Core.Models.BrachEmp", "BrachEmp")
+                        .WithMany()
+                        .HasForeignKey("BrachEmpId");
+
+                    b.HasOne("Core.Models.Day", "day")
+                        .WithMany()
+                        .HasForeignKey("dayId");
+
+                    b.Navigation("BrachEmp");
+
+                    b.Navigation("day");
+                });
+
             modelBuilder.Entity("Core.Models.Employee", b =>
                 {
                     b.HasOne("Core.Models.JobTitle", "jobTitle")
@@ -381,6 +673,35 @@ namespace Infrastructure.Migrations
                         .HasForeignKey("jobTitleId");
 
                     b.Navigation("jobTitle");
+                });
+
+            modelBuilder.Entity("Core.Models.Service", b =>
+                {
+                    b.HasOne("Core.Models.Departement", "Departement")
+                        .WithMany()
+                        .HasForeignKey("DepartementId");
+
+                    b.Navigation("Departement");
+                });
+
+            modelBuilder.Entity("Core.Models.ServiceDoctor", b =>
+                {
+                    b.HasOne("Core.Models.BranchDoctor", "BranchDoctor")
+                        .WithMany()
+                        .HasForeignKey("BranchDoctorId");
+
+                    b.HasOne("Core.Models.Service", "Service")
+                        .WithMany()
+                        .HasForeignKey("ServiceId");
+
+                    b.Navigation("BranchDoctor");
+
+                    b.Navigation("Service");
+                });
+
+            modelBuilder.Entity("Core.Models.ServiceDoctor", b =>
+                {
+                    b.Navigation("Appointments");
                 });
 #pragma warning restore 612, 618
         }

@@ -10,9 +10,9 @@ namespace Core.Models
     {
 
         public int Branch_id { get; set; }
-        public virtual Branch Branch { get; set; }
+        public Branch? Branch { get; set; }
         public int Dept_id { get; set; }
-        public virtual Departement Departement { get; set; }
+        public Departement? Departement { get; set; }
 
         public string? Notes { get; set; }
     }

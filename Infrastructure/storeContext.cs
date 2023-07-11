@@ -42,33 +42,11 @@ namespace Infrastructure
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-           // modelBuilder.Entity<Appointment>()
-           //.HasOne(a => a.ServiceDoctor)
-           //.WithMany(s => s.Appointments)
-           //.HasForeignKey(a => a.Serv_doctor_id)
-           //.OnDelete(DeleteBehavior.NoAction);
-
             modelBuilder.Entity<Appointment>()
-                .HasOne(a => a.Patient)
-                .WithMany(p => p.Appointments)
-                .HasForeignKey(a => a.Patient_id)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder.Entity<Appointment>()
-                .HasOne(a => a.Branch)
-                .WithMany(b => b.Appointments)
-                .HasForeignKey(a => a.Branch_id)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder.Entity<Appointment>()
-                .HasOne(a => a.Employee)
-                .WithMany(e => e.Appointments)
-                .HasForeignKey(a => a.emp_id)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            //
-
-           
+                .HasOne(x => x.ServiceDoctor)
+                .WithMany(x => x.Appointments)
+                .HasForeignKey(x => x.ServiceDoctorId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
 
     }

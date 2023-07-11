@@ -8,16 +8,12 @@ namespace Core.Models
 {
     public class Service : BaseModel
     {
-        public int Debt_id { get; set; }
-        public virtual Departement Departement { get; set; }
+        public int Dept_id { get; set; }
+        public Departement? Departement { get; set; }
         public string Name { get; set; }
         public decimal Price { get; set; }
 
     }
 }
 
-//serv_id
-//    dept_id
-//	name
-//	price
 

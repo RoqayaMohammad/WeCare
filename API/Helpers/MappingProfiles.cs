@@ -1,5 +1,6 @@
 ﻿using API.Dtos;
 using AutoMapper;
+using AutoMapper.Configuration;
 using Core.Models;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -14,9 +15,11 @@ namespace API.Helpers
 
             CreateMap<Appointment, AppointmentDto>()
                 .ForMember(dest => dest.AppId, opt => opt.MapFrom(src => src.Id))
-                .ForMember(dest => dest.PatientName, opt => opt.MapFrom(src => src.Patient.FName))
+                .ForMember(dest => dest.PatientName, opt => opt.MapFrom(src => src.Patient.FName +" "+src.Patient.LName))
                 .ForMember(dest => dest.BranchName, opt => opt.MapFrom(src => src.Branch.Name))
-                .ForMember(dest => dest.EmployeeName, opt => opt.MapFrom(src => src.Employee.FirstName))
+                .ForMember(dest => dest.EmployeeName, opt => opt.MapFrom(src => src.Employee.FirstName +" " + src.Employee.LastName))
+                .ForPath(dest => dest.DoctorName, opt => opt.MapFrom(src => src.ServiceDoctor.BranchDoctor.doctor.FName + " " + src.ServiceDoctor.BranchDoctor.doctor.LName))
+                .ForPath(dest => dest.service, opt => opt.MapFrom(src => src.ServiceDoctor.Service.Name))
                 .ReverseMap();
 
             CreateMap<AppointmentDto, Appointment>()
@@ -27,6 +30,10 @@ namespace API.Helpers
                 .ForMember(dest => dest.emp_id, opt => opt.MapFrom<EmployeeIdValueResolver>())
                 .ForMember(dest => dest.Patient, opt => opt.MapFrom<PatientResolver>())
                 .ForMember(dest => dest.Patient_id, opt => opt.MapFrom<PatientIdValueResolver>())
+                //.ForPath(dest => dest.ServiceDoctor.BranchDoctor.doctor, opt => opt.MapFrom<DoctorResolver>())
+                //.ForPath(dest => dest.ServiceDoctor.BranchDoctor.doctorID, opt => opt.MapFrom<DoctorIdValueResolver>())
+                //.ForPath(dest => dest.ServiceDoctor.Service, opt => opt.MapFrom<ServiceResolver>())
+                //.ForPath(dest => dest.ServiceDoctor.serv_id, opt => opt.MapFrom<ServiceIdValueResolver>())
                 .ReverseMap();
 
 
@@ -114,6 +121,231 @@ namespace API.Helpers
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Doctor_ID))
                 .ForMember(dest => dest.departement, opt => opt.MapFrom<deptNameResolver>())
                 .ForMember(dest => dest.DeptID, opt => opt.MapFrom<deptIdValueResolver>()).ReverseMap();
+
+            CreateMap<Service, ServiceDto>()
+               .ForMember(dest => dest.ServId, opt => opt.MapFrom(src => src.Id))
+               .ForMember(dest => dest.DepartementName, opt => opt.MapFrom(src => src.Departement != null ? src.Departement.Name : null))
+               .ReverseMap();
+
+            CreateMap<ServiceDto, Service>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.ServId))
+                .ForMember(dest => dest.Departement, opt => opt.MapFrom<deptNameServResolver>())
+                .ForMember(dest => dest.Dept_id, opt => opt.MapFrom<deptIdServValueResolver>()).ReverseMap();
+
+            CreateMap<ServiceDoctor, ServiceDoctorDto>()
+               .ForMember(dest => dest.servDoctorId, opt => opt.MapFrom(src => src.Id))
+               .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(src => src.Service != null ? src.Service.Name : null))
+               .ForPath(dest => dest.DoctorName, opt => opt.MapFrom(src => src.BranchDoctor.doctor != null ? src.BranchDoctor.doctor.FName + " " + src.BranchDoctor.doctor.LName : null))
+               .ForPath(dest => dest.BranchName, opt => opt.MapFrom(src => src.BranchDoctor.branch != null ? src.BranchDoctor.branch.Name : null))
+               .ReverseMap();
+
+            CreateMap<ServiceDoctorDto, ServiceDoctor>()
+              .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.servDoctorId))
+              .ForMember(dest => dest.Service, opt => opt.MapFrom<servNameServResolver>())
+              .ForMember(dest => dest.serv_id, opt => opt.MapFrom<servIdServValueResolver>())
+               //.ForPath(dest => dest.BranchDoctor.doctor, opt => opt.MapFrom<doctorNameServResolver>())
+              //.ForPath(dest => dest.BranchDoctor.doctorID, opt => opt.MapFrom<doctorIdServValueResolver>())
+              //.ForPath(dest => dest.BranchDoctor.branch, opt => opt.MapFrom<branchNameServResolver>())
+              //.ForPath(dest => dest.BranchDoctor.branchID, opt => opt.MapFrom<branchIdServValueResolver>())
+              .ReverseMap();
+
+
+        }
+        public class branchIdServValueResolver : IValueResolver<ServiceDoctorDto, ServiceDoctor, int>
+        {
+            private readonly storeContext _context;
+
+            public branchIdServValueResolver(storeContext context)
+            {
+                _context = context;
+            }
+            public int Resolve(ServiceDoctorDto source, ServiceDoctor destination, int destMember, ResolutionContext context)
+            {
+                if (source.BranchName != null)
+                {
+                    var serv = _context.Branches.FirstOrDefault(pc => pc.Name == source.BranchName);
+                    if (serv != null)
+                    {
+                        destination.BranchDoctor.branchID = serv.Id;
+
+                        return destination.BranchDoctor.branchID;
+                    }
+                }
+
+                return 1;
+            }
+        }
+        public class branchNameServResolver : IValueResolver<ServiceDoctorDto, ServiceDoctor, Branch>
+        {
+            private readonly storeContext _context;
+
+            public branchNameServResolver(storeContext context)
+            {
+                _context = context;
+            }
+
+            public Branch Resolve(ServiceDoctorDto source, ServiceDoctor destination, Branch destMember, ResolutionContext context)
+            {
+                if (source.BranchName != null)
+                {
+                    var serv = _context.Branches.FirstOrDefault(pc => pc.Name == source.BranchName);
+                    if (serv != null)
+                    {
+                        destination.BranchDoctor.branchID = serv.Id;
+                        destination.BranchDoctor.branch = serv;
+                        return destination.BranchDoctor.branch;
+                    }
+                }
+
+                throw new NotImplementedException();
+            }
+        }
+        public class doctorIdServValueResolver : IValueResolver<ServiceDoctorDto, ServiceDoctor, int>
+        {
+            private readonly storeContext _context;
+
+            public doctorIdServValueResolver(storeContext context)
+            {
+                _context = context;
+            }
+            public int Resolve(ServiceDoctorDto source, ServiceDoctor destination, int destMember, ResolutionContext context)
+            {
+                if (source.DoctorName != null)
+                {
+                    var serv = _context.Doctors.FirstOrDefault(pc => pc.FName + " "+pc.LName == source.DoctorName);
+                    if (serv != null)
+                    {
+                        destination.BranchDoctor.doctorID = serv.Id;
+
+                        return destination.BranchDoctor.doctorID;
+                    }
+                }
+
+                return 1;
+            }
+        }
+        public class doctorNameServResolver : IValueResolver<ServiceDoctorDto, ServiceDoctor, Doctor>
+        {
+            private readonly storeContext _context;
+
+            public doctorNameServResolver(storeContext context)
+            {
+                _context = context;
+            }
+
+            public Doctor Resolve(ServiceDoctorDto source, ServiceDoctor destination, Doctor destMember, ResolutionContext context)
+            {
+                if (source.DoctorName != null)
+                {
+                    var serv = _context.Doctors.FirstOrDefault(pc => pc.FName + " " + pc.LName == source.DoctorName);
+                    if (serv != null)
+                    {
+                        destination.BranchDoctor.doctorID = serv.Id;
+                        destination.BranchDoctor.doctor = serv;
+                        return destination.BranchDoctor.doctor;
+                    }
+                }
+
+                throw new NotImplementedException();
+            }
+        }
+        public class servIdServValueResolver : IValueResolver<ServiceDoctorDto, ServiceDoctor, int>
+        {
+            private readonly storeContext _context;
+
+            public servIdServValueResolver(storeContext context)
+            {
+                _context = context;
+            }
+            public int Resolve(ServiceDoctorDto source, ServiceDoctor destination, int destMember, ResolutionContext context)
+            {
+                if (source.ServiceName != null)
+                {
+                    var serv = _context.Services.FirstOrDefault(pc => pc.Name == source.ServiceName);
+                    if (serv != null)
+                    {
+                        destination.serv_id = serv.Id;
+
+                        return destination.serv_id;
+                    }
+                }
+
+                return 1;
+            }
+        }
+        public class servNameServResolver : IValueResolver<ServiceDoctorDto, ServiceDoctor, Service>
+        {
+            private readonly storeContext _context;
+
+            public servNameServResolver(storeContext context)
+            {
+                _context = context;
+            }
+
+            public Service Resolve(ServiceDoctorDto source, ServiceDoctor destination, Service destMember, ResolutionContext context)
+            {
+                if (source.ServiceName != null)
+                {
+                    var serv = _context.Services.FirstOrDefault(pc => pc.Name == source.ServiceName);
+                    if (serv != null)
+                    {
+                        destination.serv_id = serv.Id;
+                        destination.Service = serv;
+                        return destination.Service;
+                    }
+                }
+
+                throw new NotImplementedException();
+            }
+        }
+        public class deptIdServValueResolver : IValueResolver<ServiceDto, Service, int>
+        {
+            private readonly storeContext _context;
+
+            public deptIdServValueResolver(storeContext context)
+            {
+                _context = context;
+            }
+            public int Resolve(ServiceDto source, Service destination, int destMember, ResolutionContext context)
+            {
+                if (source.DepartementName != null)
+                {
+                    var dept = _context.Departements.FirstOrDefault(pc => pc.Name == source.DepartementName);
+                    if (dept != null)
+                    {
+                        destination.Dept_id = dept.Id;
+
+                        return destination.Dept_id;
+                    }
+                }
+
+                return 1;
+            }
+        }
+        public class deptNameServResolver : IValueResolver<ServiceDto, Service, Departement>
+        {
+            private readonly storeContext _context;
+
+            public deptNameServResolver(storeContext context)
+            {
+                _context = context;
+            }
+
+            public Departement Resolve(ServiceDto source, Service destination, Departement destMember, ResolutionContext context)
+            {
+                if (source.DepartementName != null)
+                {
+                    var dept = _context.Departements.FirstOrDefault(pc => pc.Name == source.DepartementName);
+                    if (dept != null)
+                    {
+                        destination.Dept_id = dept.Id;
+                        destination.Departement = dept;
+                        return destination.Departement;
+                    }
+                }
+
+                throw new NotImplementedException();
+            }
         }
         public class deptIdValueResolver : IValueResolver<DoctorDto, Doctor, int>
         {
@@ -534,7 +766,7 @@ namespace API.Helpers
         {
             if (source.PatientName != null)
             {
-                var patient = _context.Patients.FirstOrDefault(pc => pc.FName == source.PatientName);
+                var patient = _context.Patients.FirstOrDefault(pc => pc.FName+" "+pc.LName == source.PatientName);
                 if (patient != null)
                 {
                     destination.Patient_id = patient.Id;
@@ -559,7 +791,7 @@ namespace API.Helpers
         {
             if (source.PatientName != null)
             {
-                var AppPatient = _context.Patients.FirstOrDefault(pc => pc.FName == source.PatientName);
+                var AppPatient = _context.Patients.FirstOrDefault(pc => pc.FName +" "+pc.LName == source.PatientName);
                 if (AppPatient != null)
                 {
                     destination.Patient_id = AppPatient.Id;
@@ -587,7 +819,7 @@ namespace API.Helpers
         {
             if (source.EmployeeName != null)
             {
-                var emp = _context.Employees.FirstOrDefault(pc => pc.FirstName == source.EmployeeName);
+                var emp = _context.Employees.FirstOrDefault(pc => pc.FirstName + " " + pc.LastName == source.EmployeeName);
                 if (emp != null)
                 {
                     destination.emp_id = emp.Id;
@@ -612,7 +844,7 @@ namespace API.Helpers
         {
             if (source.EmployeeName != null)
             {
-                var AppEmp = _context.Employees.FirstOrDefault(pc => pc.FirstName == source.EmployeeName);
+                var AppEmp = _context.Employees.FirstOrDefault(pc => pc.FirstName +" "+pc.LastName== source.EmployeeName);
                 if (AppEmp != null)
                 {
                     destination.emp_id = AppEmp.Id;
@@ -625,4 +857,114 @@ namespace API.Helpers
         }
     }
 
+    //Doctor
+
+    public class DoctorResolver : IValueResolver<AppointmentDto, Appointment, Doctor>
+    {
+        private readonly storeContext _context;
+
+        public DoctorResolver(storeContext context)
+        {
+            _context = context;
+        }
+
+        public Doctor Resolve(AppointmentDto source, Appointment destination, Doctor destMember, ResolutionContext context)
+        {
+            if (source.DoctorName != null)
+            {
+                var doctor = _context.Doctors.FirstOrDefault(pc => pc.FName + " " + pc.LName == source.DoctorName);
+                if (doctor != null)
+                {
+                    destination.emp_id = doctor.Id;
+                    destination.ServiceDoctor.BranchDoctor.doctor = doctor;
+                    return destination.ServiceDoctor.BranchDoctor.doctor;
+                }
+            }
+
+            return null ;
+        }
+        //public void MapFrom(IPathConfigurationExpression<AppointmentDto, Appointment, Doctor> pathMap, AppointmentDto source)
+        //{
+        //    pathMap.MapFrom(src => source.DoctorName);
+        //}
+    }
+
+
+    public class DoctorIdValueResolver : IValueResolver<AppointmentDto, Appointment, int>
+    {
+        private readonly storeContext _context;
+
+        public DoctorIdValueResolver(storeContext context)
+        {
+            _context = context;
+        }
+        public int Resolve(AppointmentDto source, Appointment destination, int destMember, ResolutionContext context)
+        {
+            if (source.DoctorName != null)
+            {
+                var Appdoctor = _context.Doctors.FirstOrDefault(pc => pc.FName + " " + pc.LName == source.DoctorName);
+                if (Appdoctor != null)
+                {
+                    destination.ServiceDoctor.BranchDoctor.doctorID = Appdoctor.Id;
+
+                    return destination.ServiceDoctor.BranchDoctor.doctorID;
+                }
+            }
+
+            return 1;
+        }
+    }
+
+    //Doctor
+
+    public class ServiceResolver : IValueResolver<AppointmentDto, Appointment, Service>
+    {
+        private readonly storeContext _context;
+
+        public ServiceResolver(storeContext context)
+        {
+            _context = context;
+        }
+
+        public Service Resolve(AppointmentDto source, Appointment destination, Service destMember, ResolutionContext context)
+        {
+            if (source.service != null)
+            {
+                var serv = _context.Services.FirstOrDefault(pc => pc.Name == source.service);
+                if (serv != null)
+                {
+                    destination.ServiceDoctor.serv_id = serv.Id;
+                    destination.ServiceDoctor.Service = serv;
+                    return destination.ServiceDoctor.Service;
+                }
+            }
+
+            return destination.ServiceDoctor.Service;
+        }
+    }
+
+    public class ServiceIdValueResolver : IValueResolver<AppointmentDto, Appointment, int>
+    {
+        private readonly storeContext _context;
+
+        public ServiceIdValueResolver(storeContext context)
+        {
+            _context = context;
+        }
+        public int Resolve(AppointmentDto source, Appointment destination, int destMember, ResolutionContext context)
+        {
+            if (source.service != null)
+            {
+                var Appserv = _context.Services.FirstOrDefault(pc => pc.Name == source.service);
+                if (Appserv != null)
+                {
+                    destination.ServiceDoctor.serv_id = Appserv.Id;
+
+                    return destination.ServiceDoctor.serv_id;
+                }
+            }
+
+            return 1;
+        }
+    }
 }

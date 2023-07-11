@@ -34,7 +34,5 @@ namespace Core.Models
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}")]
         public DateTime? BirthOfDate { get; set; }
-
-        public ICollection<Appointment>? Appointments { get; set; }
     }
 }
