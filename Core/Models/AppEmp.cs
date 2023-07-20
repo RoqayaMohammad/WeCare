@@ -11,6 +11,7 @@ namespace Core.Models
     {
         public DateTime Created { get; set; } = DateTime.UtcNow;
         public DateTime LastActive { get; set; } = DateTime.UtcNow;
+        public string Email { get; set; }
         public string Gender { get; set; }
         public string City { get; set; }
         public string Country { get; set; }
