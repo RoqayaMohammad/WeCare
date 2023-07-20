@@ -3,7 +3,7 @@ using AutoMapper;
 using Core.Interfaces;
 using Core.Models;
 using Core.Specifictions;
-using Infrastructure;
+using Infrastructure.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 

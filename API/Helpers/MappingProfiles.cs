@@ -2,7 +2,8 @@
 using AutoMapper;
 using AutoMapper.Configuration;
 using Core.Models;
-using Infrastructure;
+using Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System.Drawing;
 
@@ -12,6 +13,7 @@ namespace API.Helpers
     {
         public MappingProfiles()
         {
+            CreateMap<RegisterDto, AppEmp>();
 
             CreateMap<Appointment, AppointmentDto>()
                 .ForMember(dest => dest.AppId, opt => opt.MapFrom(src => src.Id))
@@ -23,18 +25,18 @@ namespace API.Helpers
                 .ReverseMap();
 
             CreateMap<AppointmentDto, Appointment>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.AppId))
-                .ForMember(dest => dest.Branch, opt => opt.MapFrom<BranchResolver>())
-                .ForMember(dest => dest.Branch_id, opt => opt.MapFrom<BranchIdValueResolver>())
-                .ForMember(dest => dest.Employee, opt => opt.MapFrom<EmployeeResolver>())
-                .ForMember(dest => dest.emp_id, opt => opt.MapFrom<EmployeeIdValueResolver>())
-                .ForMember(dest => dest.Patient, opt => opt.MapFrom<PatientResolver>())
-                .ForMember(dest => dest.Patient_id, opt => opt.MapFrom<PatientIdValueResolver>())
-                //.ForPath(dest => dest.ServiceDoctor.BranchDoctor.doctor, opt => opt.MapFrom<DoctorResolver>())
-                //.ForPath(dest => dest.ServiceDoctor.BranchDoctor.doctorID, opt => opt.MapFrom<DoctorIdValueResolver>())
-                //.ForPath(dest => dest.ServiceDoctor.Service, opt => opt.MapFrom<ServiceResolver>())
-                //.ForPath(dest => dest.ServiceDoctor.serv_id, opt => opt.MapFrom<ServiceIdValueResolver>())
-                .ReverseMap();
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.AppId))
+            .ForMember(dest => dest.Branch, opt => opt.MapFrom<BranchResolver>())
+            .ForMember(dest => dest.Branch_id, opt => opt.MapFrom<BranchIdValueResolver>())
+            .ForMember(dest => dest.Employee, opt => opt.MapFrom<EmployeeResolver>())
+            .ForMember(dest => dest.emp_id, opt => opt.MapFrom<EmployeeIdValueResolver>())
+            .ForMember(dest => dest.Patient, opt => opt.MapFrom<PatientResolver>())
+            .ForMember(dest => dest.Patient_id, opt => opt.MapFrom<PatientIdValueResolver>())
+            //.ForPath(dest => dest.ServiceDoctor.BranchDoctor.doctor, opt => opt.MapFrom<DoctorResolver>())
+            //.ForPath(dest => dest.ServiceDoctor.BranchDoctor.doctorID, opt => opt.MapFrom<DoctorIdValueResolver>())
+            //.ForPath(dest => dest.ServiceDoctor.Service, opt => opt.MapFrom<ServiceResolver>())
+            //.ForPath(dest => dest.ServiceDoctor.serv_id, opt => opt.MapFrom<ServiceIdValueResolver>())
+            .ReverseMap();
 
 
             //
@@ -143,7 +145,7 @@ namespace API.Helpers
               .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.servDoctorId))
               .ForMember(dest => dest.Service, opt => opt.MapFrom<servNameServResolver>())
               .ForMember(dest => dest.serv_id, opt => opt.MapFrom<servIdServValueResolver>())
-               //.ForPath(dest => dest.BranchDoctor.doctor, opt => opt.MapFrom<doctorNameServResolver>())
+              //.ForPath(dest => dest.BranchDoctor.doctor, opt => opt.MapFrom<doctorNameServResolver>())
               //.ForPath(dest => dest.BranchDoctor.doctorID, opt => opt.MapFrom<doctorIdServValueResolver>())
               //.ForPath(dest => dest.BranchDoctor.branch, opt => opt.MapFrom<branchNameServResolver>())
               //.ForPath(dest => dest.BranchDoctor.branchID, opt => opt.MapFrom<branchIdServValueResolver>())
@@ -858,7 +860,6 @@ namespace API.Helpers
     }
 
     //Doctor
-
     public class DoctorResolver : IValueResolver<AppointmentDto, Appointment, Doctor>
     {
         private readonly storeContext _context;
@@ -877,16 +878,18 @@ namespace API.Helpers
                 {
                     destination.emp_id = doctor.Id;
                     destination.ServiceDoctor.BranchDoctor.doctor = doctor;
-                    return destination.ServiceDoctor.BranchDoctor.doctor;
+                    var branchDoctor = destination.ServiceDoctor.BranchDoctor;
+                    branchDoctor.doctor = doctor;
+                    return branchDoctor.doctor;
                 }
             }
 
             return null ;
         }
-        //public void MapFrom(IPathConfigurationExpression<AppointmentDto, Appointment, Doctor> pathMap, AppointmentDto source)
-        //{
-        //    pathMap.MapFrom(src => source.DoctorName);
-        //}
+        public void MapFrom(IPathConfigurationExpression<AppointmentDto, Appointment, Doctor> pathMap, AppointmentDto source)
+        {
+            pathMap.MapFrom(src => src.DoctorName);
+        }
     }
 
 
@@ -912,6 +915,10 @@ namespace API.Helpers
             }
 
             return 1;
+        }
+        public void MapFrom(IPathConfigurationExpression<AppointmentDto, Appointment, int> pathMap, AppointmentDto source)
+        {
+            pathMap.MapFrom(src => src.DoctorName);
         }
     }
 
@@ -941,6 +948,10 @@ namespace API.Helpers
 
             return destination.ServiceDoctor.Service;
         }
+        public void MapFrom(IPathConfigurationExpression<AppointmentDto, Appointment, Service> pathMap, AppointmentDto source)
+        {
+            pathMap.MapFrom(src => src.service);
+        }
     }
 
     public class ServiceIdValueResolver : IValueResolver<AppointmentDto, Appointment, int>
@@ -965,6 +976,10 @@ namespace API.Helpers
             }
 
             return 1;
+        }
+        public void MapFrom(IPathConfigurationExpression<AppointmentDto, Appointment, int> pathMap, AppointmentDto source)
+        {
+            pathMap.MapFrom(src => src.service);
         }
     }
 }

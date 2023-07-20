@@ -17,7 +17,7 @@ namespace API.Dtos
 
         public string TimeStart { get; set; }
         public string TimeEnd { get; set; }
-        public AppoinmentStatus Status { get; set; } = AppoinmentStatus.Pending;
+        public string Status { get; set; }
         public string service { get; set; }
         public string DoctorName { get; set; }
 

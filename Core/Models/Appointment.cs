@@ -13,15 +13,15 @@ namespace Core.Models
 {
     public class Appointment: BaseModel
     {
-        public enum AppoinmentStatus
-        {
-            [EnumMember(Value = "Pending")]
-            Pending,
-            [EnumMember(Value = "Confirm")]
-            Confirm,
-            [EnumMember(Value = "Done")]
-            Done
-        }
+        //public enum AppoinmentStatus
+        //{
+        //    [EnumMember(Value = "Pending")]
+        //    Pending,
+        //    [EnumMember(Value = "Confirm")]
+        //    Confirm,
+        //    [EnumMember(Value = "Done")]
+        //    Done
+        //}
         public int Patient_id { get; set; }
         [ForeignKey("Patient_id")]
         public virtual Patient Patient { get; set; }
@@ -47,7 +47,7 @@ namespace Core.Models
 
         [DataType(DataType.Time)]
         public string TimeEnd { get; set; }
-        public AppoinmentStatus Status { get; set; } = AppoinmentStatus.Pending;
+        public string Status { get; set; } 
     }
 }
 

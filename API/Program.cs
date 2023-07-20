@@ -1,9 +1,16 @@
 
+using API.Extensions;
 using API.Helpers;
 using Core.Interfaces;
-using Infrastructure;
+using Core.Models;
+using Infrastructure.Data;
 using Infrastructure.Repositories;
+using Infrastructure.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace API
 {
@@ -24,12 +31,15 @@ namespace API
                 opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 
             });
+            builder.Services.AddApplicationServices(builder.Configuration);
+            builder.Services.AddIdentityServices(builder.Configuration);
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             builder.Services.AddAutoMapper(typeof(MappingProfiles));
 
             var app = builder.Build();
+
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -40,12 +50,32 @@ namespace API
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-            app.UseAuthorization();
-            app.UseAuthentication();
+         
             app.UseRouting();
-
-
+            app.UseCors(builder => builder.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://localhost:4200"));
+            app.UseAuthentication();
+            app.UseAuthorization();
             app.MapControllers();
+
+            using var scope = app.Services.CreateScope();
+            var services = scope.ServiceProvider;
+            Task.Run(async () =>
+            {
+                try
+                {
+                    var context = services.GetRequiredService<storeContext>();
+                    var userManager = services.GetRequiredService<UserManager<AppEmp>>();
+                    var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
+                    await context.Database.MigrateAsync();
+                    await Seed.SeedAdmin(userManager, roleManager);
+                }
+                catch (Exception ex)
+                {
+                    var logger = services.GetService<ILogger<Program>>();
+                    logger.LogError(ex, "An error occurred during migration");
+                }
+            });
+
 
             app.Run();
         }

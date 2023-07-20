@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(storeContext))]
-    [Migration("20230708123924_intail")]
-    partial class intail
+    [Migration("20230712105652_fourth")]
+    partial class fourth
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -46,9 +46,8 @@ namespace Infrastructure.Migrations
                     b.Property<int>("ServiceDoctorId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.Property<string>("TimeEnd")
                         .IsRequired()
@@ -133,9 +132,11 @@ namespace Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("closeTime")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("openTime")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("weekendID")
@@ -479,10 +480,10 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("Debt_id")
+                    b.Property<int?>("DepartementId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("DepartementId")
+                    b.Property<int>("Dept_id")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")

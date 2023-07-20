@@ -4,11 +4,13 @@ using Core.Interfaces;
 using Core.Models;
 using Core.Specifictions;
 using Infrastructure;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
+    //[Authorize(Roles = "Employee")]
     [Route("api/[controller]")]
     [ApiController]
     public class AppoinmentsController : ControllerBase
@@ -59,6 +61,7 @@ namespace API.Controllers
 
             try
             {
+                appEntity.Status = "Pending";
                 await _appRepo.AddAsync(appEntity);
             }
             catch (Exception ex)
@@ -77,7 +80,7 @@ namespace API.Controllers
             // Map the ProductDto to a Product entity
             var appEntity = _mapper.Map<Core.Models.Appointment>(appDto);
             appEntity.Id = id;
-
+            appEntity.Status = "Pending";
             // Update the Product entity in the database
             await _appRepo.UpdateAsync(appEntity);
 
