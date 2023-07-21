@@ -846,7 +846,7 @@ namespace API.Helpers
         {
             if (source.EmployeeName != null)
             {
-                var AppEmp = _context.Employees.FirstOrDefault(pc => pc.FirstName +" "+pc.LastName== source.EmployeeName);
+                var AppEmp = _context.Employees.FirstOrDefault(pc => pc.FirstName + " " + pc.LastName == source.EmployeeName);
                 if (AppEmp != null)
                 {
                     destination.emp_id = AppEmp.Id;

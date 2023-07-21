@@ -1,4 +1,6 @@
-﻿using Core.Interfaces;
+﻿using API.Helpers;
+using API.Services;
+using Core.Interfaces;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
 
@@ -11,8 +13,8 @@ namespace API.Extensions
         {
             services.AddCors();
             services.AddScoped<ITokenService, TokenService>();
-            //services.Configure<CloudinarySettings>(config.GetSection("CloudinarySettings"));
-            //services.AddScoped<IPhotoService, PhotoService>();
+            services.Configure<CloudinarySettings>(config.GetSection("CloudinarySettings"));
+            services.AddScoped<IPhotoService, PhotoService>();
             //services.AddScoped<LogUserActivity>();
             //services.AddSignalR();
             //services.AddSingleton<PresenceTracker>();
