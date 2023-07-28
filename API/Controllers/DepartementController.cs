@@ -7,6 +7,7 @@ using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.Extensions.Localization;
 
 namespace API.Controllers
 {
@@ -17,13 +18,18 @@ namespace API.Controllers
         private readonly IGenericRepository<Departement> _deptRepo;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IStringLocalizer<Departement> _localization;
 
 
-        public DepartementController(IGenericRepository<Departement> deptRepo, IUnitOfWork unitOfWork, IMapper mapper)
+
+        public DepartementController(IGenericRepository<Departement> deptRepo, IUnitOfWork unitOfWork, IMapper mapper
+             , IStringLocalizer<Departement> localization)
         {
             _deptRepo = deptRepo;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _localization = localization;
+
         }
 
         [HttpGet("{id}")]
@@ -47,11 +53,11 @@ namespace API.Controllers
         {
             if (deptDto == null)
             {
-                return BadRequest("ProductDto cannot be null");
+                return BadRequest(string.Format(_localization["objNotNull"]));
             }
             if (string.IsNullOrWhiteSpace(deptDto.Name))
             {
-                throw new ArgumentException("Product name cannot be empty or whitespace.", nameof(deptDto));
+                throw new ArgumentException(string.Format(_localization["nameNotNull"]), nameof(deptDto));
             }
 
             var productEntity = _mapper.Map<Core.Models.Departement>(deptDto);

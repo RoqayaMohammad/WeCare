@@ -15,10 +15,10 @@ namespace API.Dtos
 
         public string Date { get; set; }
 
-        public string TimeStart { get; set; }
-        public string TimeEnd { get; set; }
+        public string StartTime { get; set; }
+        public string EndTime { get; set; }
         public string Status { get; set; }
-        public string service { get; set; }
+        public string Service { get; set; }
         public string DoctorName { get; set; }
 
     }

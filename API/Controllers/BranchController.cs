@@ -5,6 +5,7 @@ using Core.Models;
 using Core.Specifictions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace API.Controllers
 {
@@ -15,13 +16,16 @@ namespace API.Controllers
         private readonly IGenericRepository<Branch> _branchRepo;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IStringLocalizer<Branch> _localization;
 
 
-        public BranchController(IGenericRepository<Branch> branchRepo, IUnitOfWork unitOfWork, IMapper mapper)
+        public BranchController(IGenericRepository<Branch> branchRepo, IUnitOfWork unitOfWork, IMapper mapper
+            , IStringLocalizer<Branch> localization)
         {
             _branchRepo = branchRepo;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _localization = localization;
         }
 
         [HttpGet("{id}")]
@@ -47,11 +51,11 @@ namespace API.Controllers
         {
             if (branchDto == null)
             {
-                return BadRequest("ProductDto cannot be null");
+                return BadRequest(string.Format(_localization["objNotNull"]));
             }
             if (string.IsNullOrWhiteSpace(branchDto.Name))
             {
-                throw new ArgumentException("Product name cannot be empty or whitespace.", nameof(branchDto));
+                throw new ArgumentException(string.Format(_localization["nameNotNull"]), nameof(branchDto));
             }
 
             var branchEntity = _mapper.Map<Core.Models.Branch>(branchDto);

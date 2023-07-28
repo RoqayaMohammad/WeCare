@@ -5,6 +5,7 @@ using Core.Models;
 using Core.Specifictions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace API.Controllers
 {
@@ -15,13 +16,16 @@ namespace API.Controllers
         private readonly IGenericRepository<Service> _servRepo;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IStringLocalizer<Service> _localization;
 
 
-        public ServicesController(IUnitOfWork unitOfWork, IMapper mapper, IGenericRepository<Service> servRepo)
+        public ServicesController(IUnitOfWork unitOfWork, IMapper mapper, IGenericRepository<Service> servRepo
+            , IStringLocalizer<Service> localization)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _servRepo = servRepo;
+            _localization = localization;
         }
 
         [HttpGet("{id}")]
@@ -47,11 +51,11 @@ namespace API.Controllers
         {
             if (doctorDto == null)
             {
-                return BadRequest("DoctorDto cannot be null");
+                return BadRequest(string.Format(_localization["objNotNull"]));
             }
             if (string.IsNullOrWhiteSpace(doctorDto.Name))
             {
-                throw new ArgumentException("Doctor name cannot be empty or whitespace.", nameof(doctorDto));
+                throw new ArgumentException(string.Format(_localization["nameNotNull"]), nameof(doctorDto));
             }
 
             var productEntity = _mapper.Map<Core.Models.Service>(doctorDto);

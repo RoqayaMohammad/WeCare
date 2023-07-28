@@ -1,6 +1,7 @@
 
 using API.Extensions;
 using API.Helpers;
+using API.Middleware;
 using Core.Interfaces;
 using Core.Models;
 using Infrastructure.Data;
@@ -9,6 +10,7 @@ using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -38,6 +40,8 @@ namespace API
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             builder.Services.AddAutoMapper(typeof(MappingProfiles));
 
+
+
             var app = builder.Build();
 
 
@@ -53,8 +57,20 @@ namespace API
          
             app.UseRouting();
             app.UseCors(builder => builder.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://localhost:4200"));
+
+            var supportedCultures = new[] { "ar-EG", "en-US" };
+            var localizationOptions = new RequestLocalizationOptions()
+                .SetDefaultCulture(supportedCultures[0])
+                .AddSupportedCultures(supportedCultures);
+
+            app.UseRequestLocalization(localizationOptions);
+
+
             app.UseAuthentication();
             app.UseAuthorization();
+
+            //app.UseRequestCulture();
+
             app.MapControllers();
 
             using var scope = app.Services.CreateScope();

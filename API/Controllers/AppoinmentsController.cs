@@ -7,6 +7,7 @@ using Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace API.Controllers
 {
@@ -18,13 +19,17 @@ namespace API.Controllers
         private readonly IGenericRepository<Appointment> _appRepo;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IStringLocalizer<Appointment> _localization;
 
 
-        public AppoinmentsController(IUnitOfWork unitOfWork, IMapper mapper, IGenericRepository<Appointment> appRepo)
+        public AppoinmentsController(IUnitOfWork unitOfWork, IMapper mapper, IGenericRepository<Appointment> appRepo
+            , IStringLocalizer<Appointment> localization)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _appRepo = appRepo;
+            _localization = localization;
+
         }
 
         [HttpGet("{id}")]
@@ -50,11 +55,11 @@ namespace API.Controllers
         {
             if (appDto == null)
             {
-                return BadRequest("appDto cannot be null");
+                return BadRequest(string.Format(_localization["objNotNull"]));
             }
             if (string.IsNullOrWhiteSpace(appDto.PatientName))
             {
-                throw new ArgumentException("patient name cannot be empty or whitespace.", nameof(appDto));
+                throw new ArgumentException(string.Format(_localization["nameNotNull"]), nameof(appDto));
             }
 
             var appEntity = _mapper.Map<Core.Models.Appointment>(appDto);

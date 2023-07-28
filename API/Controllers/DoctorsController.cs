@@ -6,6 +6,7 @@ using Core.Specifictions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace API.Controllers
@@ -17,13 +18,17 @@ namespace API.Controllers
         private readonly IGenericRepository<Doctor> _doctorRepo;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IStringLocalizer<Doctor> _localization;
 
 
-        public DoctorsController(IUnitOfWork unitOfWork, IMapper mapper, IGenericRepository<Doctor> doctorRepo)
+
+        public DoctorsController(IUnitOfWork unitOfWork, IMapper mapper, IGenericRepository<Doctor> doctorRepo
+            , IStringLocalizer<Doctor> localization)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _doctorRepo = doctorRepo;
+            _localization = localization;
         }
 
         [HttpGet("{id}")]
@@ -49,11 +54,11 @@ namespace API.Controllers
         {
             if (doctorDto == null)
             {
-                return BadRequest("DoctorDto cannot be null");
+                return BadRequest(string.Format(_localization["objNotNull"]));
             }
-            if (string.IsNullOrWhiteSpace(doctorDto.FName))
+            if (string.IsNullOrWhiteSpace(doctorDto.FirstName))
             {
-                throw new ArgumentException("Doctor name cannot be empty or whitespace.", nameof(doctorDto));
+                throw new ArgumentException(string.Format(_localization["nameNotNull"]), nameof(doctorDto));
             }
 
             var productEntity = _mapper.Map<Core.Models.Doctor>(doctorDto);

@@ -5,6 +5,7 @@ using Core.Models;
 using Core.Specifictions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace API.Controllers
 {
@@ -15,13 +16,17 @@ namespace API.Controllers
         private readonly IGenericRepository<BranchDoctor> _branchDoctorRepo;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IStringLocalizer<BranchDoctor> _localization;
 
 
-        public BranchDoctorController(IUnitOfWork unitOfWork, IMapper mapper, IGenericRepository<BranchDoctor> branchDoctorRepo)
+        public BranchDoctorController(IUnitOfWork unitOfWork, IMapper mapper, IGenericRepository<BranchDoctor> branchDoctorRepo
+             , IStringLocalizer<BranchDoctor> localization)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _branchDoctorRepo = branchDoctorRepo;
+            _localization = localization;
+
         }
 
         [HttpGet("{id}")]
@@ -47,15 +52,15 @@ namespace API.Controllers
         {
             if (doctorDto == null)
             {
-                return BadRequest("ProductDto cannot be null");
+                return BadRequest(string.Format(_localization["objNotNull"]));
             }
             if (string.IsNullOrWhiteSpace(doctorDto.doctorName))
             {
-                throw new ArgumentException("doctor name cannot be empty or whitespace.", nameof(doctorDto));
+                throw new ArgumentException(string.Format(_localization["nameNotNull"]), nameof(doctorDto));
             }
             if (string.IsNullOrWhiteSpace(doctorDto.branchName))
             {
-                throw new ArgumentException("branch name cannot be empty or whitespace.", nameof(doctorDto));
+                throw new ArgumentException(string.Format(_localization["nameNotNull"]), nameof(doctorDto));
             }
             var productEntity = _mapper.Map<Core.Models.BranchDoctor>(doctorDto);
 

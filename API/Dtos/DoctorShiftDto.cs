@@ -8,8 +8,8 @@ namespace API.Dtos
         public int DoctorShift_ID { get; set; }
         public string DoctorName { get; set; }
         public string BranchName { get; set; }
-        public string dayOfWeek { get; set; }
-        public string? startTime { get; set; }
-        public string? endTime { get; set; }
+        public string DayOfWeek { get; set; }
+        public string? StartTime { get; set; }
+        public string? EndTime { get; set; }
     }
 }

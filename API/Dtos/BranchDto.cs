@@ -15,9 +15,9 @@ namespace API.Dtos
 
         public string? Phone2 { get; set; }
 
-        public string openTime { get; set; }
+        public string OpenTime { get; set; }
 
-        public string closeTime { get; set; }
-        public string weekendDay { get; set; }
+        public string CloseTime { get; set; }
+        public string WeekendDay { get; set; }
     }
 }

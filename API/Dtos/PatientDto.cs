@@ -7,11 +7,9 @@ namespace API.Dtos
         [Key]
         public int Patient_ID { get; set; }
 
-        [Display(Name = "First Name")]
-        public string? FName { get; set; }
+        public string? FirstName { get; set; }
 
-        [Display(Name = "Last Name")]
-        public string? LName { get; set; }
+        public string? LastName { get; set; }
         public string? Address { get; set; }
 
         public string? Phone1 { get; set; }

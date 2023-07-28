@@ -4,6 +4,7 @@ using Core.Interfaces;
 using Core.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace API.Controllers
 {
@@ -14,13 +15,17 @@ namespace API.Controllers
         private readonly IGenericRepository<Day> _dayRepo;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IStringLocalizer<Day> _localization;
 
 
-        public DaysController(IGenericRepository<Day> dayRepo, IUnitOfWork unitOfWork, IMapper mapper)
+        public DaysController(IGenericRepository<Day> dayRepo, IUnitOfWork unitOfWork, IMapper mapper
+            , IStringLocalizer<Day> localization)
         {
             _dayRepo = dayRepo;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _localization = localization;
+
         }
 
         [HttpGet("{id}")]
@@ -44,11 +49,11 @@ namespace API.Controllers
         {
             if (dayDto == null)
             {
-                return BadRequest("ProductDto cannot be null");
+                return BadRequest(string.Format(_localization["objNotNull"]));
             }
             if (string.IsNullOrWhiteSpace(dayDto.Name))
             {
-                throw new ArgumentException("Product name cannot be empty or whitespace.", nameof(dayDto));
+                throw new ArgumentException(string.Format(_localization["nameNotNull"]), nameof(dayDto));
             }
 
             var dayEntity = _mapper.Map<Core.Models.Day>(dayDto);

@@ -21,7 +21,7 @@ namespace API.Helpers
                 .ForMember(dest => dest.BranchName, opt => opt.MapFrom(src => src.Branch.Name))
                 .ForMember(dest => dest.EmployeeName, opt => opt.MapFrom(src => src.Employee.FirstName +" " + src.Employee.LastName))
                 .ForPath(dest => dest.DoctorName, opt => opt.MapFrom(src => src.ServiceDoctor.BranchDoctor.doctor.FName + " " + src.ServiceDoctor.BranchDoctor.doctor.LName))
-                .ForPath(dest => dest.service, opt => opt.MapFrom(src => src.ServiceDoctor.Service.Name))
+                .ForPath(dest => dest.Service, opt => opt.MapFrom(src => src.ServiceDoctor.Service.Name))
                 .ReverseMap();
 
             CreateMap<AppointmentDto, Appointment>()
@@ -69,13 +69,23 @@ namespace API.Helpers
             CreateMap<Day, DayDto>()
                 .ForMember(dest => dest.Day_ID, opt => opt.MapFrom(src => src.Id))
                 .ReverseMap();
+
             CreateMap<Patient, PatientDto>()
                 .ForMember(dest => dest.Patient_ID, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FName))
+                .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.LName))
                 .ReverseMap();
+
+            CreateMap<PatientDto, Patient>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Patient_ID))
+                .ForMember(dest => dest.FName, opt => opt.MapFrom(src => src.FirstName))
+                .ForMember(dest => dest.LName, opt => opt.MapFrom(src => src.LastName))
+                .ReverseMap();
+
 
             CreateMap<Branch, BranchDto>()
                 .ForMember(dest => dest.Branch_ID, opt => opt.MapFrom(src => src.Id))
-                .ForMember(dest => dest.weekendDay, opt => opt.MapFrom(src => src.weekend != null? src.weekend.Name : null))
+                .ForMember(dest => dest.WeekendDay, opt => opt.MapFrom(src => src.weekend != null? src.weekend.Name : null))
                 .ReverseMap();
 
 
@@ -103,7 +113,7 @@ namespace API.Helpers
                 .ForMember(dest => dest.DoctorShift_ID, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.DoctorName, opt => opt.MapFrom(src => src.branchDoctor.doctor.FName))
                 .ForMember(dest => dest.BranchName, opt => opt.MapFrom(src => src.branchDoctor.branch.Name))
-                .ForMember(dest => dest.dayOfWeek, opt => opt.MapFrom(src => src.day.Name))
+                .ForMember(dest => dest.DayOfWeek, opt => opt.MapFrom(src => src.day.Name))
                 .ReverseMap();
 
             CreateMap<DoctorShiftDto, DoctorShift>()
@@ -116,11 +126,15 @@ namespace API.Helpers
 
             CreateMap<Doctor, DoctorDto>()
                 .ForMember(dest => dest.Doctor_ID, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FName))
+                .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.LName))
                 .ForMember(dest => dest.departementName, opt => opt.MapFrom(src => src.departement != null ? src.departement.Name : null))
                 .ReverseMap();
 
             CreateMap<DoctorDto, Doctor>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Doctor_ID))
+                .ForMember(dest => dest.FName, opt => opt.MapFrom(src => src.FirstName))
+                .ForMember(dest => dest.LName, opt => opt.MapFrom(src => src.LastName))
                 .ForMember(dest => dest.departement, opt => opt.MapFrom<deptNameResolver>())
                 .ForMember(dest => dest.DeptID, opt => opt.MapFrom<deptIdValueResolver>()).ReverseMap();
 
@@ -408,9 +422,9 @@ namespace API.Helpers
             }
             public int Resolve(BranchDto source, Branch destination, int destMember, ResolutionContext context)
             {
-                if (source.weekendDay != null)
+                if (source.WeekendDay != null)
                 {
-                    var day = _context.Days.FirstOrDefault(pc => pc.Name == source.weekendDay);
+                    var day = _context.Days.FirstOrDefault(pc => pc.Name == source.WeekendDay);
                     if (day != null)
                     {
                         destination.weekendID = day.Id;
@@ -433,9 +447,9 @@ namespace API.Helpers
 
             Day IValueResolver<BranchDto, Branch, Day>.Resolve(BranchDto source, Branch destination, Day destMember, ResolutionContext context)
             {
-                if (source.weekendDay != null)
+                if (source.WeekendDay != null)
                 {
-                    var day = _context.Days.FirstOrDefault(pc => pc.Name == source.weekendDay);
+                    var day = _context.Days.FirstOrDefault(pc => pc.Name == source.WeekendDay);
                     if (day != null)
                     {
                         destination.weekendID = day.Id;
@@ -459,9 +473,9 @@ namespace API.Helpers
         }
         public int Resolve(DoctorShiftDto source, DoctorShift destination, int destMember, ResolutionContext context)
         {
-            if (source.dayOfWeek != null)
+            if (source.DayOfWeek != null)
             {
-                var day = _context.Days.FirstOrDefault(pc => pc.Name == source.dayOfWeek);
+                var day = _context.Days.FirstOrDefault(pc => pc.Name == source.DayOfWeek);
                 if (day != null)
                 {
                     destination.day_ID = day.Id;
@@ -485,9 +499,9 @@ namespace API.Helpers
 
         Day IValueResolver<DoctorShiftDto, DoctorShift, Day>.Resolve(DoctorShiftDto source, DoctorShift destination, Day destMember, ResolutionContext context)
         {
-            if (source.dayOfWeek != null)
+            if (source.DayOfWeek != null)
             {
-                var day = _context.Days.FirstOrDefault(pc => pc.Name == source.dayOfWeek);
+                var day = _context.Days.FirstOrDefault(pc => pc.Name == source.DayOfWeek);
                 if (day != null)
                 {
                     destination.day_ID = day.Id;
@@ -935,9 +949,9 @@ namespace API.Helpers
 
         public Service Resolve(AppointmentDto source, Appointment destination, Service destMember, ResolutionContext context)
         {
-            if (source.service != null)
+            if (source.Service != null)
             {
-                var serv = _context.Services.FirstOrDefault(pc => pc.Name == source.service);
+                var serv = _context.Services.FirstOrDefault(pc => pc.Name == source.Service);
                 if (serv != null)
                 {
                     destination.ServiceDoctor.serv_id = serv.Id;
@@ -950,7 +964,7 @@ namespace API.Helpers
         }
         public void MapFrom(IPathConfigurationExpression<AppointmentDto, Appointment, Service> pathMap, AppointmentDto source)
         {
-            pathMap.MapFrom(src => src.service);
+            pathMap.MapFrom(src => src.Service);
         }
     }
 
@@ -964,9 +978,9 @@ namespace API.Helpers
         }
         public int Resolve(AppointmentDto source, Appointment destination, int destMember, ResolutionContext context)
         {
-            if (source.service != null)
+            if (source.Service != null)
             {
-                var Appserv = _context.Services.FirstOrDefault(pc => pc.Name == source.service);
+                var Appserv = _context.Services.FirstOrDefault(pc => pc.Name == source.Service);
                 if (Appserv != null)
                 {
                     destination.ServiceDoctor.serv_id = Appserv.Id;
@@ -979,7 +993,7 @@ namespace API.Helpers
         }
         public void MapFrom(IPathConfigurationExpression<AppointmentDto, Appointment, int> pathMap, AppointmentDto source)
         {
-            pathMap.MapFrom(src => src.service);
+            pathMap.MapFrom(src => src.Service);
         }
     }
 }

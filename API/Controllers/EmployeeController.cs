@@ -6,6 +6,7 @@ using Core.Specifictions;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace API.Controllers
 {
@@ -17,15 +18,17 @@ namespace API.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly storeContext _context;
+        private readonly IStringLocalizer<Employee> _localization;
 
         public EmployeeController(
             IGenericRepository<Employee> empRepo,
-            IUnitOfWork unitOfWork, IMapper mapper, storeContext conext)
+            IUnitOfWork unitOfWork, IMapper mapper, storeContext conext, IStringLocalizer<Employee> localization)
         {
             _empRepo = empRepo;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _context = conext;
+            _localization = localization;
         }
 
         [HttpGet("{id}")]
@@ -53,12 +56,12 @@ namespace API.Controllers
        
             if (empDto == null)
             {
-                return BadRequest("EmpDto cannot be null");
+                return BadRequest(string.Format(_localization["objNotNull"]));
             }
 
             if (string.IsNullOrWhiteSpace(empDto.FirstName))
             {
-                return BadRequest("Employee first name cannot be empty or whitespace.");
+                return BadRequest(string.Format(_localization["nameNotNull"]));
             }
 
             var empEntity = _mapper.Map<Employee>(empDto);

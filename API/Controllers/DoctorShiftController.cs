@@ -5,6 +5,7 @@ using Core.Models;
 using Core.Specifictions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace API.Controllers
 {
@@ -15,13 +16,17 @@ namespace API.Controllers
         private readonly IGenericRepository<DoctorShift> _doctorShiftRepo;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IStringLocalizer<DoctorShift> _localization;
 
 
-        public DoctorShiftController(IUnitOfWork unitOfWork, IMapper mapper, IGenericRepository<DoctorShift> doctorShiftRepo)
+
+        public DoctorShiftController(IUnitOfWork unitOfWork, IMapper mapper, IGenericRepository<DoctorShift> doctorShiftRepo
+            , IStringLocalizer<DoctorShift> localization)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _doctorShiftRepo = doctorShiftRepo;
+            _localization = localization;
         }
 
         [HttpGet("{id}")]
@@ -46,11 +51,11 @@ namespace API.Controllers
         {
             if (doctorDto == null)
             {
-                return BadRequest("DoctorShiftDto cannot be null");
+                return BadRequest(string.Format(_localization["objNotNull"]));
             }
             if (string.IsNullOrWhiteSpace(doctorDto.DoctorName) && string.IsNullOrWhiteSpace( doctorDto.BranchName))
             {
-                throw new ArgumentException("Branch or doctor name cannot be empty or whitespace.", nameof(doctorDto));
+                throw new ArgumentException(string.Format(_localization["nameNotNull"]), nameof(doctorDto));
             }
 
             var productEntity = _mapper.Map<Core.Models.DoctorShift>(doctorDto);

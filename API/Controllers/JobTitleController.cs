@@ -4,6 +4,7 @@ using Core.Interfaces;
 using Core.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace API.Controllers
 {
@@ -14,13 +15,16 @@ namespace API.Controllers
         private readonly IGenericRepository<JobTitle> _jobRepo;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IStringLocalizer<JobTitle> _localization;
 
 
-        public JobTitleController(IGenericRepository<JobTitle> jobRepo, IUnitOfWork unitOfWork, IMapper mapper)
+        public JobTitleController(IGenericRepository<JobTitle> jobRepo, IUnitOfWork unitOfWork, IMapper mapper
+            , IStringLocalizer<JobTitle> localization)
         {
             _jobRepo = jobRepo;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _localization = localization;
         }
 
         [HttpGet("{id}")]
@@ -44,11 +48,11 @@ namespace API.Controllers
         {
             if (deptDto == null)
             {
-                return BadRequest("ProductDto cannot be null");
+                return BadRequest(string.Format(_localization["objNotNull"]));
             }
             if (string.IsNullOrWhiteSpace(deptDto.Title))
             {
-                throw new ArgumentException("Product name cannot be empty or whitespace.", nameof(deptDto));
+                throw new ArgumentException(string.Format(_localization["nameNotNull"]), nameof(deptDto));
             }
 
             var productEntity = _mapper.Map<Core.Models.JobTitle>(deptDto);

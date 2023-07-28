@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 
 namespace API.Controllers
 {
@@ -17,18 +18,22 @@ namespace API.Controllers
         private readonly UserManager<AppEmp> _userManager;
         private readonly ITokenService _tokenService;
         private readonly IMapper _mapper;
-        public AccountController(UserManager<AppEmp> userManager, ITokenService tokenService, IMapper mapper)
+        private readonly IStringLocalizer<AppEmp> _localization;
+
+        public AccountController(UserManager<AppEmp> userManager, ITokenService tokenService, IMapper mapper
+            , IStringLocalizer<AppEmp> localization)
         {
             _userManager = userManager;
             _mapper = mapper;
             _tokenService = tokenService;
+            _localization = localization;
         }
         [HttpPost("register")]
         public async Task<ActionResult<AppEmpDto>> Register(RegisterDto registerDto)
         {
-            if (await UserExists(registerDto.Username)) return BadRequest("Username is taken");
+            if (await UserExists(registerDto.Username)) return BadRequest(string.Format(_localization["userTaken"]));
 
-            if (await UserExists(registerDto.Email)) return BadRequest("Email is taken");
+            if (await UserExists(registerDto.Email)) return BadRequest(string.Format(_localization["emailTaken"]));
 
             var emp = _mapper.Map<AppEmp>(registerDto);
 
@@ -56,11 +61,11 @@ namespace API.Controllers
                 //.Include(p => p.Photos)
                 .SingleOrDefaultAsync(x => x.UserName == loginDto.Username || x.Email == loginDto.Username);
 
-            if (user == null) return Unauthorized("invalid username");
+            if (user == null) return Unauthorized(string.Format(_localization["userInvaled"]));
 
             var result = await _userManager.CheckPasswordAsync(user, loginDto.Password);
 
-            if (!result) return Unauthorized("Invalid password");
+            if (!result) return Unauthorized(string.Format(_localization["passInvalid"]));
 
             return new AppEmpDto
             {
